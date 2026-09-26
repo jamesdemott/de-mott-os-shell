@@ -1,0 +1,99 @@
+/* Area list pages, and the To-do list — a running list where a date is
+   optional. Same broadsheet rules as the front page: see "The look" in
+   CLAUDE.md. Rows sit on the paper separated by hairlines; the headline
+   face carries titles and figures, sans carries everything around them. */
+
+.lsec{margin-top:44px}
+.lsec .shead h2{display:flex;align-items:baseline;gap:11px}
+/* The count used to be a pill. A figure set beside the headline in the
+   headline face says the same thing without a shape around it. */
+.lcount{font-family:var(--fd);font-size:17px;font-weight:600;color:var(--muted);
+  background:none;border-radius:0;padding:0;font-variant-numeric:tabular-nums}
+.lsec.overdue .shead{border-bottom-color:var(--accent)}
+.lsec.overdue .shead h2,.lsec.overdue .lcount{color:var(--accent)}
+
+.lgroup{border:none;border-radius:0;
+  background:none;box-shadow:none;overflow:visible}
+.litem{display:grid;grid-template-columns:19px minmax(0,1fr) 170px auto;gap:0 20px;
+  align-items:baseline;padding:13px 0;border-bottom:1px solid var(--rule)}
+.litem:last-child{border-bottom:none}
+/* No hover tint: a block of colour sliding under a row is a screen idiom.
+   The title picking up the area's colour says "this one" just as well. */
+.litem:hover .ttl{color:var(--area)}
+.lmain .ttl{font-family:var(--fd);font-size:17px;font-weight:600;line-height:1.3;
+  letter-spacing:-.015em}
+.lmain .nt{display:block;font-size:13px;color:var(--muted);margin-top:3px;line-height:1.45}
+/* On To-do the area name is the byline inside the note line, so it keeps
+   its own capitalisation — "Novin / ProforMap" is a name. */
+.lareatag{font-family:var(--fd);font-style:italic;font-weight:400;color:var(--area,var(--muted))}
+.lwhen{font-size:12.5px;color:var(--ink-2);font-variant-numeric:tabular-nums;
+  text-align:right;white-space:nowrap}
+.lwhen i{font-style:italic;font-family:var(--fd);color:var(--muted);margin-left:8px}
+.lsec.overdue .lwhen{color:var(--accent)}
+.lsec.overdue .lwhen i{color:var(--accent);opacity:.75}
+.lact{display:flex;align-items:center;justify-self:end;white-space:nowrap}
+.litem.due .ttl::before{content:"";display:inline-block;width:6px;height:6px;border-radius:0;
+  background:var(--area,var(--accent));margin-right:9px;vertical-align:2px}
+#s-done .lgroup{opacity:.7}
+.lsec.parked .litem .ttl{color:var(--ink-2);font-weight:400}
+
+@media (max-width:760px){
+  .litem{grid-template-columns:19px minmax(0,1fr);gap:4px 14px}
+  .lwhen,.lact{grid-column:2;text-align:left}
+  .lact{justify-self:start;margin-top:4px}
+}
+
+/* ---- project bar ----
+   The point of a project field is seeing the pieces of one thing together,
+   so each chip is a filter rather than decoration. Squared and ruled, like
+   every other tag in the system. */
+.projbar{display:flex;flex-wrap:wrap;align-items:baseline;gap:8px;margin:0 0 26px;
+  padding-bottom:12px;border-bottom:1px solid var(--rule)}
+.projbar .plabel{font-family:var(--fb);font-size:10.5px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin-right:4px}
+.pchip{display:inline-flex;align-items:baseline;gap:7px;font-family:var(--fd);font-size:14px;
+  padding:2px 10px;border:1px solid var(--rule-2);border-radius:0;color:var(--ink-2);
+  text-decoration:none;background:none}
+.pchip:hover{border-color:var(--area,var(--ink));color:var(--area,var(--ink))}
+.pchip b{font-family:var(--fb);font-size:11px;font-variant-numeric:tabular-nums;
+  color:var(--muted);font-weight:600}
+/* #projbar never carries --area — and on To-do it can't, because the rollup
+   spans areas by design. Without a fallback the background was invalid at
+   computed-value time and fell back to transparent, leaving ground-coloured
+   text on the ground: the selected chip was invisible. It was invisible
+   before the redesign too, as white on paper. Ink is area-agnostic and
+   correct on both editions. */
+.pchip.on{background:var(--area,var(--ink));border-color:var(--area,var(--ink));
+  color:var(--ground)}
+.pchip.on b{color:var(--ground);opacity:.75}
+.pchip.clear{border-style:dashed;color:var(--muted)}
+
+/* ---- tracker ----
+   A status table for an area that has one (area.tracks). Priority reads as
+   weight: High solid, Medium ruled in its own colour, Low a quiet outline. */
+#s-tracks{margin-bottom:36px}
+.tscroll{overflow-x:auto;border:none;border-radius:0;
+  background:none;box-shadow:none}
+.tracks{width:100%;border-collapse:collapse;font-size:14.5px}
+.tracks th{text-align:left;font-family:var(--fb);font-size:10px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--muted);padding:11px 16px 11px 0;
+  border-bottom:1px solid var(--rule-2);white-space:nowrap}
+.tracks td{padding:13px 16px 13px 0;border-bottom:1px solid var(--rule);vertical-align:top}
+.tracks tbody tr:last-child td{border-bottom:none}
+.tracks tbody tr:not(.tedit):hover .tname{color:var(--area)}
+.tracks .tname{font-family:var(--fd);font-size:16px;font-weight:600;letter-spacing:-.015em;
+  min-width:170px;line-height:1.3}
+.tracks .ttext{color:var(--ink-2);font-size:13px;line-height:1.5;min-width:160px}
+.tracks .tact{text-align:right;width:1%;padding-right:0}
+.tracks tr.tedit td{background:var(--surface-2)}
+.tracks tr.tedit .editor{margin:0}
+.tprio,.tstat{display:inline-block;font-family:var(--fb);font-size:11px;font-weight:600;
+  letter-spacing:.04em;white-space:nowrap;padding:1px 8px;border-radius:0;border:1px solid var(--area)}
+.tprio.p-high{background:var(--area);color:var(--ground)}
+.tprio.p-medium{background:none;color:var(--area)}
+.tprio.p-low{background:none;color:var(--muted);border-color:var(--rule-2)}
+.tstat{border-color:var(--rule-2);color:var(--ink-2)}
+.tstat.s-not-started{border-style:dashed;color:var(--accent);border-color:var(--accent)}
+.tstat.s-scheduled{color:var(--area);border-color:var(--area)}
+.tstat.s-follow-up-needed{color:var(--accent);border-color:var(--accent)}
+#trackadd{margin-top:12px}

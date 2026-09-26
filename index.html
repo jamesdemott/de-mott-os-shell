@@ -1,0 +1,116 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>De Mott OS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F3EB" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#15130F" media="(prefers-color-scheme:dark)">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+<button class="themebtn" id="themebtn" type="button">theme</button>
+<div class="wrap">
+  <!-- Masthead: dateline, nameplate, standfirst, then the figures. The
+       section bar sits under it the way a paper's index does. -->
+  <header class="home">
+    <div class="dateline">
+      <span class="eyebrow" id="eyebrow"></span>
+      <span class="edition" id="edition"></span>
+    </div>
+    <h1 id="pagetitle">De Mott OS</h1>
+    <p class="sub" id="pagesub"></p>
+    <div class="statrow" id="statrow"></div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <div id="boot"></div>
+
+  <!-- The lead, with the Pull Canvas box-out beside it. -->
+  <div class="lead">
+    <section id="s-today">
+      <div class="shead"><h2>Today</h2>
+        <p class="note">Everything dated today, merged across areas.</p></div>
+      <div class="today-panel" id="todaypanel"></div>
+      <div class="today-panel prep-panel" id="preppanel" hidden></div>
+    </section>
+    <aside class="leadside">
+      <section id="s-canvas" hidden>
+        <div class="canvas" id="canvaspanel"></div>
+      </section>
+      <section id="s-whatsapp" hidden>
+        <div class="wacard" id="wapanel"></div>
+      </section>
+    </aside>
+  </div>
+
+  <!-- The briefs: each hides itself when empty, and the band goes with them. -->
+  <div class="briefs">
+    <section id="s-slipped" hidden>
+      <div class="shead"><h2>Slipped</h2>
+        <p class="note">Past its date and not ticked off. Tick it or deal with it.</p></div>
+      <div class="slipped" id="slipped"></div>
+    </section>
+
+    <section id="s-clash" hidden>
+      <div class="shead"><h2>Colliding</h2>
+        <p class="note">Time you've reserved for Novin or the capstone, with something else landing on it.</p></div>
+      <div class="slipped" id="clash"></div>
+    </section>
+
+    <section id="s-loose" hidden>
+      <div class="shead"><h2 id="loosehead">Unscheduled</h2>
+        <p class="note">Captured without a date. Give it one when it earns one, or tick it off.</p></div>
+      <div class="slipped" id="loose"></div>
+    </section>
+  </div>
+
+  <section id="s-horizon">
+    <div class="shead"><h2 id="horizonhead">What's coming</h2>
+      <p class="note">The near horizon, merged. Dates in red are inside the next three days.</p></div>
+    <div class="horizon" id="horizon"></div>
+  </section>
+
+  <section id="s-flight" hidden>
+    <div class="shead"><h2>In flight</h2>
+      <p class="note">Work that has a status rather than a date. Synced from its own board — dates here are context, not deadlines.</p></div>
+    <div id="flight"></div>
+  </section>
+
+  <section id="s-load">
+    <div class="shead"><h2>Load ahead</h2>
+      <p class="note">One cell per deliverable, per week, coloured by area, with the hours it adds up to underneath. Classes are excluded — this is work, not attendance.</p></div>
+    <div class="loadstrip" id="loadstrip"></div>
+    <div class="loadlabels" id="loadlabels"></div>
+    <div class="loadkey" id="loadkey"></div>
+  </section>
+
+  <section id="s-areas">
+    <div class="shead"><h2>Areas</h2>
+      <p class="note">The places everything lands. Capture into one and it goes live here.</p></div>
+    <div class="areas" id="areas"></div>
+  </section>
+
+  <div class="statusstrip" id="statusstrip"></div>
+  <footer class="rebuild" id="rebuild"></footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script src="js/util.js"></script>
+<script src="js/outbox.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/rows.js"></script>
+<script src="js/phone.js"></script>
+<script src="js/home.js"></script>
+<script src="js/canvas.js"></script>
+<script src="js/whatsapp.js"></script>
+</body>
+</html>

@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Done · De Mott OS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F3EB" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#15130F" media="(prefers-color-scheme:dark)">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/home.css">
+<link rel="stylesheet" href="css/list.css">
+<link rel="stylesheet" href="css/review.css">
+</head>
+<body>
+<button class="themebtn" id="themebtn" type="button">theme</button>
+<div class="wrap">
+  <header class="home">
+    <div class="eyebrow">THE RECORD</div>
+    <h1>Done</h1>
+    <p class="sub">Everything ticked off, newest week first, across every area — plus the archived shelf. Untick anything to bring it back to the live list.</p>
+    <div class="statrow" id="statrow"></div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <div id="boot"></div>
+
+  <div id="weeks"></div>
+
+  <section id="s-archived" hidden>
+    <div class="shead"><h2 id="archhead">Archived</h2>
+      <p class="note">Dropped without being finished, and kept rather than deleted. Unarchive from the row editor.</p></div>
+    <div class="rvgroup" id="archlist"></div>
+  </section>
+
+  <footer class="rebuild" id="rebuild"></footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script src="js/util.js"></script>
+<script src="js/outbox.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/rows.js"></script>
+<script src="js/done.js"></script>
+</body>
+</html>

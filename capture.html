@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Capture · De Mott OS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F3EB" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#15130F" media="(prefers-color-scheme:dark)">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/home.css">
+</head>
+<body>
+<button class="themebtn" id="themebtn" type="button">theme</button>
+<div class="wrap">
+  <header class="home">
+    <div class="hmain">
+      <div class="eyebrow">CAPTURE</div>
+      <h1>Add something</h1>
+      <p class="sub">One line for something you already know the shape of. A paragraph when you
+        don't — Claude reads that one and files it.</p>
+    </div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <div id="boot"></div>
+
+  <section class="capsec" id="s-capture">
+    <div class="caphead">
+      <h2>Add a reminder</h2>
+      <p class="note">One line. Dates, times and <code>@area</code> are read out of it; the preview
+        shows what it understood before you add.</p>
+    </div>
+    <form class="capture" id="capform" autocomplete="off">
+      <span class="capplus">+</span>
+      <input id="capinput" type="text" spellcheck="false"
+             placeholder="call the dentist   ·   nov 3 renew insurance @admin   ·   fri 2-4pm site walk @novin">
+      <button type="submit" id="capbtn">add</button>
+      <div class="cappreview" id="cappreview"></div>
+    </form>
+  </section>
+
+  <section class="capsec thinksec" id="s-think">
+    <div class="caphead">
+      <h2>Brain dump</h2>
+      <p class="note">Anything, in any order. Claude files it — reminders, dates, tracker rows —
+        and anything it can't do becomes a note for the next coding session.</p>
+    </div>
+    <textarea id="thinkbox" rows="4" spellcheck="false"
+      placeholder="deposit due before the 1st · ask about moving the standing appointment · RDEV reading is piling up, block Sunday morning · the tracker should sort by status"></textarea>
+    <div class="thinkrow">
+      <button type="button" class="mini go" id="thinkbtn">send to Claude</button>
+      <span class="thinkhint">⌘↵ to send · uses your Anthropic API key</span>
+    </div>
+    <div class="thinkout" id="thinkout"></div>
+  </section>
+
+  <footer class="rebuild" id="rebuild"></footer>
+</div>
+<div class="toast" id="toast" hidden></div>
+<script src="js/util.js"></script>
+<script src="js/outbox.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/capture.js"></script>
+<script src="js/rows.js"></script>
+<script src="js/think.js"></script>
+<script src="js/capturepage.js"></script>
+</body>
+</html>

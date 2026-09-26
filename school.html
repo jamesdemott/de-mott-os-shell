@@ -1,0 +1,84 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>School · De Mott OS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F3EB" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#15130F" media="(prefers-color-scheme:dark)">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/school.css">
+</head>
+<body>
+<button class="todaybtn" id="todaybtn" type="button" hidden>&#9679; today</button>
+<button class="themebtn" id="themebtn" type="button">theme</button>
+<div class="wrap">
+  <header>
+    <div class="eyebrow" id="eyebrow"></div>
+    <h1 id="pagetitle"></h1>
+    <p class="sub" id="pagesub"></p>
+    <div class="statrow" id="statrow"></div>
+    <div class="rebuild" id="rebuild"></div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <div id="boot"></div>
+
+  <section id="s-load">
+    <div class="shead"><h2>Where the pressure lands — Fall 2026</h2>
+      <p class="note">Bar height = share of course grade coming due that week, summed across courses and computed live from <code>data/school/events.json</code>.</p></div>
+    <div class="load" id="load"></div>
+    <div class="loadlabels" id="loadlabels"></div>
+    <div class="loadkey" id="loadkey"></div>
+    <div class="hotweeks" id="hotweeks"></div>
+  </section>
+
+  <section id="s-week">
+    <div class="shead"><h2>What a normal week looks like</h2>
+      <p class="note">Classes, prep blocks and office hours placed. Everything tinted is unclaimed.</p></div>
+    <div class="wkscroll"><div class="wk" id="wk"></div></div>
+    <div class="wklegend"><span><b>Solid</b> = class &nbsp;·&nbsp; <b>Bordered</b> = prep block &nbsp;·&nbsp; <b>Dashed</b> = office hours &nbsp;·&nbsp; <b>Tinted</b> = unclaimed</span></div>
+    <div class="wknote" id="wknote"></div>
+  </section>
+
+  <section id="s-cal">
+    <div class="shead"><h2>Master calendar</h2><div class="filters" id="filters"></div></div>
+    <div id="cal"></div>
+  </section>
+
+  <section id="s-courses">
+    <div class="shead"><h2>Course reference</h2>
+      <p class="note">Grading weights, rooms, contacts and the policies worth knowing before you need them.</p></div>
+    <div class="courses" id="courses"></div>
+  </section>
+
+  <section id="s-cap">
+    <div class="shead"><h2>Capstone runway</h2>
+      <p class="note" id="capnote"></p></div>
+    <div class="courses" id="captracks"></div>
+  </section>
+
+  <section id="s-confirm">
+    <div class="shead"><h2>Worth confirming</h2>
+      <p class="note">Places where the syllabi are silent, internally inconsistent, or leave a date open.</p></div>
+    <div class="confirm" id="confirm"></div>
+  </section>
+
+  <footer>
+    <span>Local copy. Edit <code>data/*.json</code> and refresh; run <code>python3 build_ics.py</code> to rebuild the calendars.</span>
+    <span class="mono" id="stamp"></span>
+  </footer>
+</div>
+<script src="js/util.js"></script>
+<script src="js/outbox.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/school.js"></script>
+</body>
+</html>

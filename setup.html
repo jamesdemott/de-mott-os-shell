@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Setup · De Mott OS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="default">
+<meta name="theme-color" content="#F7F3EB" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#15130F" media="(prefers-color-scheme:dark)">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/home.css">
+<style>
+  /* Paper, not cards: the steps are separated by rules, like everything else. */
+  .steps{counter-reset:s;margin:0;padding:0;list-style:none}
+  .steps li{counter-increment:s;position:relative;padding:14px 0 14px 34px;border-bottom:1px solid var(--rule)}
+  .steps li::before{content:counter(s);position:absolute;left:0;top:14px;
+    font-family:var(--fd);font-size:18px;color:var(--accent)}
+  .steps li:last-child{border-bottom:0}
+  .fieldrow{display:flex;gap:8px;align-items:stretch;margin:6px 0 2px}
+  .fieldrow input{flex:1;min-width:0;font-family:var(--fm);font-size:13px;
+    padding:9px 10px;border:1px solid var(--rule-2);background:var(--surface);color:var(--ink)}
+  .fieldrow input:focus{outline:0;border-color:var(--accent)}
+  .state{font-family:var(--fb);font-size:13px;margin-top:10px;color:var(--muted)}
+  .state.ok{color:var(--ink)} .state.bad{color:var(--accent)}
+  .state b{font-weight:600}
+</style>
+</head>
+<body>
+<button class="themebtn" id="themebtn" type="button">theme</button>
+<div class="wrap">
+  <header class="home">
+    <div class="eyebrow">AWAY FROM THE DESK</div>
+    <h1>Setup</h1>
+    <p class="sub">When this page is open on your phone your Mac is almost certainly asleep, so there is nothing
+      on localhost to ask. It reads the copy of <code>data/</code> that the Mac has been committing all along —
+      your private repo — and caches it here so it still draws with no network at all.
+      <em>It needs a token to do that, because the repo is private.</em></p>
+    <div class="statrow" id="statrow"></div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+
+  <section>
+    <div class="shead"><h2>The token</h2>
+      <p class="note">A fine-grained token, scoped to this one repository, revocable from GitHub in one click.
+        It is stored only on this device and is never sent anywhere but api.github.com.</p></div>
+    <ol class="steps">
+      <li>Open <a href="https://github.com/settings/personal-access-tokens/new" target="_blank" rel="noopener">github.com → fine-grained tokens</a>.</li>
+      <li>Under <b>Repository access</b> pick <b>Only select repositories</b>, and choose <code>de-mott-os</code>.</li>
+      <li>Under <b>Repository permissions</b> set <b>Contents</b> to <b>Read and write</b>.
+        <em>Write is what lets this phone capture and tick: it adds a file to
+        <code>data/outbox/</code>, which your Mac replays. It never edits your data directly.</em></li>
+      <li>Generate it, copy it, and paste it here. Nothing echoes it back.
+        <div class="fieldrow">
+          <input id="tok" type="password" autocomplete="off" autocapitalize="off"
+                 autocorrect="off" spellcheck="false" placeholder="github_pat_…">
+          <button class="mini go" id="save" type="button">Save</button>
+        </div>
+        <div class="state" id="state">Checking…</div>
+      </li>
+    </ol>
+    <p class="note" style="margin-top:14px">
+      <button class="mini" id="test" type="button">Test the connection</button>
+      <button class="mini danger" id="clear" type="button">Forget the token</button>
+    </p>
+  </section>
+
+  <footer class="rebuild" id="rebuild"></footer>
+</div>
+<script src="js/util.js"></script>
+<script src="js/outbox.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/setup.js"></script>
+</body>
+</html>

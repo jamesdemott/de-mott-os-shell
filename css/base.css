@@ -1,0 +1,289 @@
+/* De Mott OS — the shared design system.
+   Every page links this first, and nothing below is page-specific.
+
+   The look is a broadsheet, not a dashboard. That means, concretely:
+
+   - Paper, not cards. There is one ground colour and things sit ON it,
+     separated by rules. No white panels floating on grey, no drop shadows,
+     no rounded corners. A shadow is a screen idiom; a rule is a print one,
+     and rules are what this page is made of.
+   - Serif for anything that is a headline — the masthead, section heads, a
+     row title, a figure. Sans for the apparatus around it: notes, times,
+     counts, buttons. Mono is reserved for things that are literally code
+     (the capture syntax, a filename), which is most of what mono is for.
+   - One accent, and it means "look at this". Slipped, over capacity, a
+     stale sync, the next thing due. The token is --accent; --gold is kept
+     as an alias because five stylesheets and a year of notes call it that.
+
+   Area and course colours keep their names (--a-school, --c205, …) because
+   data/areas.json and data/school/courses.json name them; only the values
+   changed, so every page picks up the new palette without a data edit. */
+
+:root{
+  /* ---- day edition: warm paper, near-black ink ---- */
+  --ground:#F7F3EB; --surface:#FFFCF5; --surface-2:#EFE9DD;
+  --ink:#1A1713; --ink-2:#463F37; --muted:#877D6F; --rule:#DFD7C7; --rule-2:#C2B7A3;
+  --accent:#B33A1C; --accent-soft:#F4E4DC;
+  --gold:var(--accent); --gold-soft:var(--accent-soft);
+  --c293:#2B6A5B; --c293-bg:#E2EDE9;
+  --c205:#334E8C; --c205-bg:#E4E8F3;
+  --crdev:#94601A; --crdev-bg:#F4EAD8;
+  --cmba:#8C3350; --cmba-bg:#F3E3E6;
+  --ccap:#57458A; --ccap-bg:#E9E5F1;
+  /* life areas */
+  --a-school:#2C4C7C; --a-school-bg:#E3E8F1;
+  --a-novin:#2A6A4E; --a-novin-bg:#E1ECE5;
+  --a-admin:#8A661C; --a-admin-bg:#F2EAD6;
+  --a-life:#67386F; --a-life-bg:#EDE4EF;
+  --a-health:#93374C; --a-health-bg:#F2E2E5;
+  --shadow:none;
+  --fd:"Fraunces","Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;
+  --fb:"Instrument Sans",-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+  --fm:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+}
+/* ---- night edition ----
+   Not grey-on-black: the ground keeps the paper's warmth so the two themes
+   read as the same publication printed twice, and so the area colours don't
+   have to be re-invented to survive the switch. */
+@media (prefers-color-scheme:dark){
+  :root:not([data-theme="light"]){
+    --ground:#15130F; --surface:#1C1915; --surface-2:#24201A;
+    --ink:#EFE8DB; --ink-2:#C7BEAF; --muted:#8F857A; --rule:#2F2A22; --rule-2:#473F34;
+    --accent:#E5674A; --accent-soft:#33190F;
+    --c293:#6FC2AC; --c293-bg:#152D28;
+    --c205:#8CA6E8; --c205-bg:#1A2140;
+    --crdev:#DCA357; --crdev-bg:#31240E;
+    --cmba:#DF849C; --cmba-bg:#351920;
+    --ccap:#A798DC; --ccap-bg:#231D35;
+    --a-school:#84A6DB; --a-school-bg:#17223A;
+    --a-novin:#63B394; --a-novin-bg:#122D25;
+    --a-admin:#D3A44A; --a-admin-bg:#2E2511;
+    --a-life:#B98ACB; --a-life-bg:#281D2E;
+    --a-health:#E08296; --a-health-bg:#32181C; --shadow:none;
+  }
+}
+:root[data-theme="dark"]{
+  --ground:#15130F; --surface:#1C1915; --surface-2:#24201A;
+  --ink:#EFE8DB; --ink-2:#C7BEAF; --muted:#8F857A; --rule:#2F2A22; --rule-2:#473F34;
+  --accent:#E5674A; --accent-soft:#33190F;
+  --c293:#6FC2AC; --c293-bg:#152D28;
+  --c205:#8CA6E8; --c205-bg:#1A2140;
+  --crdev:#DCA357; --crdev-bg:#31240E;
+  --cmba:#DF849C; --cmba-bg:#351920;
+  --ccap:#A798DC; --ccap-bg:#231D35;
+  --a-school:#84A6DB; --a-school-bg:#17223A;
+  --a-novin:#63B394; --a-novin-bg:#122D25;
+  --a-admin:#D3A44A; --a-admin-bg:#2E2511;
+  --a-life:#B98ACB; --a-life-bg:#281D2E;
+  --a-health:#E08296; --a-health-bg:#32181C; --shadow:none;
+}
+
+*{box-sizing:border-box}
+body{margin:0;background:var(--ground);color:var(--ink);font-family:var(--fb);
+  font-size:16px;line-height:1.6;-webkit-font-smoothing:antialiased;
+  font-optical-sizing:auto;font-synthesis:none}
+.wrap{max-width:1080px;margin:0 auto;padding:0 28px 110px}
+h1,h2,h3,h4{font-family:var(--fd);text-wrap:balance;margin:0;font-weight:600;
+  letter-spacing:-.012em;line-height:1.15}
+a{color:inherit}
+.mono{font-family:var(--fm);font-variant-numeric:tabular-nums}
+code{font-family:var(--fm);font-size:.86em;background:var(--surface-2);
+  padding:1px 5px;color:var(--ink-2)}
+
+/* A kicker: the small letterspaced line that sits over a headline in print.
+   Uppercased on purpose — it is never a name. Names (a course, an area,
+   "ProforMap") keep their own capitalisation everywhere; see .navtab. */
+.eyebrow{font-family:var(--fb);font-size:10.5px;font-weight:600;
+  letter-spacing:.2em;text-transform:uppercase;color:var(--muted)}
+
+/* ---- masthead ----
+   Rule, nameplate, rule. The heavy line under the nameplate is the only
+   2px rule on the page, which is what makes everything below it read as
+   the paper rather than as more chrome. */
+header{padding:38px 0 0;border-bottom:none}
+header h1{font-size:clamp(34px,6vw,58px);font-weight:600;letter-spacing:-.03em;
+  line-height:1;margin:0}
+header p.sub{color:var(--ink-2);max-width:64ch;margin:10px 0 0;
+  font-family:var(--fd);font-style:italic;font-size:16.5px;line-height:1.5}
+header p.sub a{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor}
+
+/* The index line: the figures, set as a run of headline numerals divided by
+   hairlines. It replaced a row of bordered stat boxes — boxes made four
+   equal-looking tiles out of things that are not equal, and the one that
+   matters (what is next, what has slipped) got no more weight than a count. */
+.statrow{display:flex;flex-wrap:wrap;align-items:baseline;gap:0;
+  margin-top:22px;padding:13px 0;border-top:1px solid var(--ink);
+  border-bottom:1px solid var(--rule-2)}
+.stat{display:flex;align-items:baseline;gap:9px;padding:0 20px;
+  border-left:1px solid var(--rule)}
+.stat:first-child{padding-left:0;border-left:none}
+.stat b{font-family:var(--fd);font-size:25px;font-weight:600;line-height:1;
+  letter-spacing:-.02em;font-variant-numeric:tabular-nums}
+.stat span{font-size:12.5px;color:var(--muted);max-width:26ch;line-height:1.35}
+.stat.flag b,.stat.slip b{color:var(--accent)}
+.stat.flag span{max-width:38ch}
+.stat.flag span,.stat.slip span{color:var(--ink-2)}
+
+/* ---- the section bar ----
+   Set like a newspaper's index strip: serif, sentence case, hairline above
+   and below, the current section underscored in its own colour.
+   Never uppercased. The names carry their own capitalisation and
+   "Novin / ProforMap" is one of them — flattening it loses the name. */
+.nav{display:flex;flex-wrap:wrap;gap:0 26px;align-items:center;
+  padding:9px 0;margin:0;border-bottom:1px solid var(--rule)}
+.navtab{font-family:var(--fd);font-size:14.5px;color:var(--muted);
+  text-decoration:none;padding:3px 0;border-bottom:2px solid transparent}
+.navtab:hover{color:var(--ink)}
+.navtab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--area,var(--accent))}
+
+/* ---- sections ----
+   A head is a headline with a rule under it and a standfirst beneath, which
+   is how a print page announces a section. The old shape put the note beside
+   the heading and let it fight for the same line. */
+section{margin-top:52px}
+.shead{margin-bottom:20px;padding-bottom:9px;border-bottom:1px solid var(--ink)}
+.shead h2{font-size:23px;font-weight:600;letter-spacing:-.018em}
+.shead .note{font-size:13.5px;color:var(--muted);max-width:66ch;margin:5px 0 0;
+  font-family:var(--fd);font-style:italic;line-height:1.45}
+
+/* ---- error state ---- */
+.err{border-top:2px solid var(--accent);border-bottom:1px solid var(--rule);
+  background:var(--accent-soft);color:var(--ink);padding:16px 18px;margin:26px 0;font-size:14.5px}
+.err strong{font-family:var(--fd);font-size:17px}
+
+/* ---- floating page chrome ----
+   Small ruled tags rather than buttons: they sit over the paper without
+   pretending to be part of it. */
+.themebtn,.todaybtn{position:fixed;bottom:16px;z-index:50;font-family:var(--fb);
+  font-size:10.5px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;
+  padding:8px 13px;border-radius:0;border:1px solid var(--rule-2);
+  background:var(--ground);color:var(--muted);cursor:pointer}
+.themebtn:hover,.todaybtn:hover{color:var(--ink);border-color:var(--ink)}
+/* stacked, not side by side — the theme label changes width as it cycles */
+.themebtn{right:16px}
+.todaybtn{right:16px;bottom:56px;border-color:var(--accent);color:var(--accent)}
+.todaybtn:hover{background:var(--accent);color:var(--ground);border-color:var(--accent)}
+/* the row the dock launcher lands on */
+.day.flash{animation:flashday 2.4s ease-out}
+.day.flash .dnum{color:var(--accent)}
+@keyframes flashday{
+  0%,55%{background:var(--accent-soft);box-shadow:-16px 0 0 var(--accent-soft),16px 0 0 var(--accent-soft)}
+  100%{background:transparent;box-shadow:-16px 0 0 transparent,16px 0 0 transparent}
+}
+@media (prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ---- row chips: repeat, project, a set duration ----
+   Properties of the item rather than of the day it landed on. Quiet on
+   purpose — they're context you read after the title, never before it. */
+.chip{display:inline-block;font-family:var(--fb);font-size:10.5px;font-weight:600;
+  letter-spacing:.06em;line-height:1.6;padding:0 6px;margin-left:7px;
+  white-space:nowrap;border:1px solid var(--rule-2);color:var(--muted);vertical-align:2px}
+.chip.rep{border-color:var(--area,var(--rule-2));color:var(--area,var(--muted))}
+.chip.proj{border-color:transparent;background:var(--surface-2);color:var(--ink-2)}
+.chip.hrs{font-variant-numeric:tabular-nums}
+.isdone .chip{opacity:.45}
+
+/* ---- tick controls ----
+   Shared by every page that shows a row, so they can't drift apart.
+   Square, hairline, no radius: a printed checkbox. */
+.tickcell{display:flex;align-items:center;min-height:18px}
+.tick{width:15px;height:15px;flex:none;border:1px solid var(--rule-2);border-radius:0;
+  background:none;cursor:pointer;padding:0;font-size:10px;line-height:1;color:transparent;
+  display:flex;align-items:center;justify-content:center;transition:border-color .1s,background .1s}
+.tick:hover{border-color:var(--area,var(--accent))}
+.tick.on{background:var(--area,var(--accent));border-color:var(--area,var(--accent));
+  color:var(--ground);font-weight:700}
+.isdone .ttl{text-decoration:line-through;opacity:.45}
+.isdone .tag,.isdone .nt,.isdone .when,.isdone .wt{opacity:.45}
+
+/* ---- capture ----
+   A ruled writing line rather than a box: the cursor sits on a rule the way
+   it would on paper, and the rule goes accent when the field has focus. */
+.capsec{margin-top:34px;padding:0 0 4px;background:none;border:none;border-top:2px solid var(--ink)}
+.caphead{display:block;margin:14px 0 10px}
+.caphead h2{font-size:21px;letter-spacing:-.018em}
+.caphead .note{margin:4px 0 0;font-size:13.5px;color:var(--muted);
+  font-family:var(--fd);font-style:italic;line-height:1.45}
+.caphead code{font-family:var(--fm);font-size:11.5px}
+.capsec .capture{margin-top:0}
+.capture{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:12px;
+  margin-top:28px;padding:9px 0;background:none;border:none;
+  border-bottom:1.5px solid var(--rule-2);border-radius:0;box-shadow:none}
+.capture:focus-within{border-bottom-color:var(--accent)}
+.capplus{font-family:var(--fd);font-size:22px;color:var(--rule-2);line-height:1}
+.capture:focus-within .capplus{color:var(--accent)}
+.capture input{border:none;background:none;font-family:var(--fd);font-size:19px;
+  color:var(--ink);padding:3px 0;min-width:0;outline:none}
+.capture input::placeholder{color:var(--muted);opacity:.7;font-family:var(--fd);
+  font-style:italic;font-size:18px}
+.capture button{font-family:var(--fb);font-size:10.5px;font-weight:600;letter-spacing:.16em;
+  text-transform:uppercase;border:1px solid var(--rule-2);background:none;color:var(--muted);
+  border-radius:0;padding:8px 15px;cursor:pointer}
+.capture button:hover:not(:disabled){border-color:var(--accent);color:var(--accent)}
+.capture button:disabled{opacity:.45;cursor:default}
+.cappreview{grid-column:1/-1;font-size:12.5px;font-family:var(--fm);line-height:1.6;min-height:0}
+.cappreview:not(:empty){padding-top:10px;margin-top:5px;border-top:1px solid var(--rule)}
+.cappreview.good{color:var(--muted)}
+.cappreview.good b{color:var(--area,var(--ink));font-weight:600}
+.cappreview.good i,.cappreview.good u{font-style:normal;text-decoration:none;color:var(--muted)}
+.cappreview.bad{color:var(--accent)}
+
+/* ---- brain dump ---- */
+.thinksec{border-top-color:var(--a-school)}
+.thinksec textarea{width:100%;box-sizing:border-box;resize:vertical;min-height:70px;
+  font-family:var(--fd);font-size:17px;line-height:1.55;color:var(--ink);padding:12px 14px;
+  background:var(--surface);border:1px solid var(--rule-2);border-radius:0;outline:none}
+.thinksec textarea:focus{border-color:var(--a-school)}
+.thinksec textarea::placeholder{color:var(--muted);opacity:.7;font-style:italic;font-size:16px}
+.thinkrow{display:flex;align-items:center;gap:14px;margin-top:12px}
+.thinkhint{font-size:12px;color:var(--muted)}
+.thinkout:empty{display:none}
+.thinkout{margin-top:14px;padding:13px 0 0;border-top:1px solid var(--rule);
+  font-size:14.5px;line-height:1.6;background:none;border-radius:0}
+.thinkout p{margin:0 0 6px}
+.thinkout.wait{color:var(--muted);font-family:var(--fd);font-style:italic}
+.thinkout.warn{border-top-color:var(--accent);color:var(--ink-2)}
+.thinkout.warn code{font-size:12px}
+.thinkdid{margin:8px 0 10px;padding-left:18px;color:var(--ink-2);font-size:13.5px}
+.thinkdid li{margin:3px 0}
+.thinknone{color:var(--muted);font-style:italic}
+
+/* ---- row editing ---- */
+.editbtn{margin-left:10px;border:none;background:none;color:var(--rule-2);cursor:pointer;
+  font-size:15px;line-height:1;padding:0 3px}
+.editbtn:hover{color:var(--accent)}
+.mini{font-family:var(--fb);font-size:10.5px;font-weight:600;letter-spacing:.08em;
+  border:1px solid var(--rule-2);background:none;color:var(--muted);border-radius:0;
+  padding:4px 8px;cursor:pointer;margin-left:5px}
+.mini:hover{border-color:var(--area,var(--accent));color:var(--area,var(--accent))}
+.mini.danger:hover{border-color:var(--accent);color:var(--accent)}
+.mini.go{border-color:var(--area,var(--accent));color:var(--area,var(--accent))}
+.editor{display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:12px;align-items:end;
+  padding:16px 18px;margin:0 -18px;background:var(--surface-2);
+  border-top:1px solid var(--area,var(--ink));border-bottom:1px solid var(--rule)}
+.editor label{display:flex;flex-direction:column;gap:5px;font-family:var(--fb);
+  font-size:10px;font-weight:600;letter-spacing:.16em;text-transform:uppercase;color:var(--muted)}
+.editor input,.editor select{font-family:var(--fb);font-size:14.5px;padding:7px 9px;
+  border:1px solid var(--rule-2);border-radius:0;background:var(--ground);color:var(--ink);min-width:0}
+.editor input:focus,.editor select:focus{outline:none;border-color:var(--area,var(--accent))}
+.editor .ednote{grid-column:1/-1;font-size:12.5px;color:var(--muted);
+  font-family:var(--fd);font-style:italic;background:none;padding:0}
+.editor .ednote b{color:var(--ink-2);font-style:normal;font-family:var(--fb);font-size:11.5px}
+.editor label.wide{grid-column:1/-1}
+.editor .edrow{grid-column:1/-1;display:flex;align-items:center;gap:7px;flex-wrap:wrap}
+.editor .edquick{margin-right:auto}
+@media (max-width:760px){.editor{grid-template-columns:1fr 1fr}}
+
+/* ---- toast ---- */
+.toast{position:fixed;left:50%;transform:translateX(-50%);bottom:24px;z-index:60;
+  background:var(--ink);color:var(--ground);font-size:14px;padding:12px 18px;border-radius:0;
+  box-shadow:0 8px 28px -10px rgba(0,0,0,.55);max-width:min(90vw,560px)}
+.toast .tlink{background:none;border:none;color:var(--accent);font:inherit;font-weight:600;
+  text-decoration:underline;cursor:pointer;padding:0 0 0 5px}
+
+@media (max-width:760px){
+  .wrap{padding:0 18px 90px}
+  .statrow{gap:10px 0}
+  .stat{padding:0 14px}
+  .nav{gap:0 18px}
+}

@@ -1,0 +1,214 @@
+/* School page only — pressure strip, week grid, master calendar, course
+   cards, the confirm list. Broadsheet rules as everywhere else: paper not
+   cards, serif for headlines, sans for apparatus, one accent. See "The
+   look" in CLAUDE.md before changing any of that here.
+
+   Text on a solid colour is always var(--ground), never #fff. The day
+   edition's ground is paper and the course colours are dark; the night
+   edition's ground is near-black and the same colours come back light. One
+   token covers both, which is what the two theme overrides here used to do
+   by hand — and only for two of the eight block types. */
+
+/* ---- course filter chips ----
+   These were `.chip` too, which is base.css's row chip — the little
+   repeat / project / hours tags on an item. Two unrelated things under one
+   name, and the only reason it never broke is that this page happens not to
+   render row chips. That is luck, not design, so the filter chip is
+   `.coursechip` now and the two can't collide. It is also a real control
+   (a button you press) rather than a passive tag, which is the other half
+   of why they shouldn't share a name. */
+.filters{display:flex;flex-wrap:wrap;gap:8px}
+.coursechip{font-family:var(--fd);font-size:14px;font-weight:400;letter-spacing:0;
+  border:1px solid var(--rule-2);background:none;color:var(--ink-2);border-radius:0;
+  padding:2px 10px;cursor:pointer;display:inline-flex;align-items:baseline;gap:8px;
+  line-height:1.5;transition:opacity .12s}
+.coursechip .dot{width:7px;height:7px;border-radius:0;flex:none;align-self:center}
+.coursechip[aria-pressed="false"]{opacity:.35}
+.coursechip:focus-visible{outline:1px solid var(--accent);outline-offset:2px}
+.dcap{background:var(--ccap)}
+.d293{background:var(--c293)}.d205{background:var(--c205)}.drdev{background:var(--crdev)}.dmba{background:var(--cmba)}
+
+/* ---- pressure strip ----
+   Bar height is share of course grade coming due that week. It is one
+   quantity, so it is one colour — the old gradient ran from CP 205's blue
+   to CP 293's green and looked like it meant something per course. */
+.load{display:grid;grid-template-columns:repeat(17,1fr);gap:5px;align-items:end;
+  height:132px;margin-bottom:0;border-bottom:1px solid var(--rule-2)}
+.bar{position:relative;background:none;border-radius:0;display:flex;align-items:flex-end;min-height:3px}
+.bar i{display:block;width:100%;border-radius:0;background:var(--ink-2);opacity:1}
+.bar.hot i{background:var(--accent)}
+.bar.now{outline:1px solid var(--accent);outline-offset:3px}
+.loadlabels{display:grid;grid-template-columns:repeat(17,1fr);gap:5px;margin-top:8px;
+  font-size:10px;color:var(--muted);text-align:center;font-variant-numeric:tabular-nums}
+.loadkey{display:flex;gap:6px 26px;flex-wrap:wrap;margin-top:18px;padding-top:14px;
+  border-top:1px solid var(--rule);font-family:var(--fd);font-style:italic;
+  font-size:13px;color:var(--muted);line-height:1.5}
+.loadkey b{font-family:var(--fb);font-style:normal;font-size:12.5px;font-weight:600;color:var(--ink-2)}
+.hotweeks{margin-top:26px;display:grid;gap:26px;grid-template-columns:repeat(auto-fit,minmax(250px,1fr))}
+.hw{border:none;border-top:2px solid var(--accent);background:none;border-radius:0;padding:12px 0 0}
+.hw h4{font-family:var(--fd);font-size:17px;font-weight:600;letter-spacing:-.015em;margin-bottom:5px}
+.hw p{margin:0;font-size:13.5px;color:var(--ink-2);line-height:1.5}
+
+/* ---- master calendar ---- */
+.month{margin-bottom:40px}
+.month h3{font-family:var(--fd);font-size:20px;font-weight:600;letter-spacing:-.018em;
+  text-transform:none;color:var(--ink);padding-bottom:9px;border-bottom:1px solid var(--ink);
+  margin-bottom:0}
+.day{display:grid;grid-template-columns:78px minmax(0,1fr);gap:0 22px;padding:12px 0;
+  border-bottom:1px solid var(--rule)}
+.day:last-child{border-bottom:none}
+.day.past{opacity:.45}
+.day.today .dnum{color:var(--accent)}
+.day.today .dwk{color:var(--accent)}
+.dcol{padding-top:1px}
+.dnum{font-family:var(--fd);font-size:22px;font-weight:600;line-height:1.05;
+  letter-spacing:-.03em;font-variant-numeric:lining-nums}
+.dwk{font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:.2em;
+  text-transform:uppercase;color:var(--muted);margin-top:2px}
+.items{display:flex;flex-direction:column;gap:9px;min-width:0}
+
+/* Same gutter as the front page: the course label right-aligned in its own
+   column, the headline left-aligned, the weight at the far right. The two
+   ragged edges meet on one line, which is what makes 93 rows scan. Labels
+   are never uppercased — the stored string is the label. */
+.item{display:grid;grid-template-columns:146px minmax(0,1fr) auto;gap:0 18px;
+  align-items:baseline;padding:0;border-radius:0;background:none;border:none;min-width:0}
+.item .tag{font-family:var(--fd);font-style:italic;font-size:13.5px;font-weight:400;
+  letter-spacing:0;white-space:normal;min-width:0;text-align:right;line-height:1.3}
+.item .body{min-width:0;display:block}
+.item .ttl{display:block;font-family:var(--fd);font-size:16px;line-height:1.3;letter-spacing:-.012em}
+.item .nt{display:block;font-size:12.5px;color:var(--muted);line-height:1.45;margin-top:3px}
+.item .wt{font-size:11.5px;font-weight:600;white-space:nowrap;padding:0;border-radius:0;
+  background:none;color:var(--muted);font-variant-numeric:tabular-nums}
+/* A deadline is marked by a square in its course colour and a bold
+   headline, not by a tinted block behind it. */
+.item.due .ttl{font-weight:600}
+.item.due .ttl::before{content:"";display:inline-block;width:6px;height:6px;
+  background:var(--ink);margin-right:9px;vertical-align:2px}
+/* The course colour rides the label and the square only. It must not be set
+   on .item itself: the square takes currentColor from .ttl, which is ink,
+   so colouring the row would have painted every square the wrong colour. */
+.item.k293 .tag{color:var(--c293)} .item.k293.due .ttl::before{background:var(--c293)}
+.item.k205 .tag{color:var(--c205)} .item.k205.due .ttl::before{background:var(--c205)}
+.item.krdev .tag{color:var(--crdev)} .item.krdev.due .ttl::before{background:var(--crdev)}
+.item.kmba .tag{color:var(--cmba)} .item.kmba.due .ttl::before{background:var(--cmba)}
+.item.kcap .tag{color:var(--ccap)} .item.kcap.due .ttl::before{background:var(--ccap)}
+.item.class .ttl{font-size:15px;color:var(--ink-2)}
+.item.admin .tag{color:var(--accent)}
+.item.admin.due .ttl::before{background:var(--accent)}
+.hidden{display:none!important}
+
+/* ---- week grid ----
+   The one genuinely gridded thing on the site, so it keeps its frame —
+   but hairlines, square corners, and text on colour via --ground. */
+.wk{display:grid;grid-template-columns:44px repeat(7,1fr);gap:0;
+  border:1px solid var(--rule-2);border-radius:0;background:none;overflow:hidden}
+.wk .hcol,.wk .dcolh{border-bottom:1px solid var(--rule-2);padding:9px 6px;
+  font-family:var(--fb);font-size:10px;font-weight:600;letter-spacing:.18em;
+  text-transform:uppercase;text-align:center;color:var(--muted)}
+.wk .hcol{border-right:1px solid var(--rule)}
+.wk .hours{position:relative;border-right:1px solid var(--rule);height:540px}
+.wk .hours span{position:absolute;right:7px;font-size:9.5px;color:var(--muted);
+  transform:translateY(-5px);font-variant-numeric:tabular-nums}
+.wk .col{position:relative;height:540px;border-right:1px solid var(--rule)}
+.wk .col:last-child{border-right:none}
+.wk .col::before{content:"";position:absolute;inset:0;
+  background:repeating-linear-gradient(180deg,transparent 0,transparent 39px,var(--rule) 39px,var(--rule) 40px)}
+.blk{position:absolute;left:2px;right:2px;border-radius:0;padding:4px 6px;font-size:10.5px;
+  line-height:1.3;overflow:hidden;z-index:2}
+.blk b{display:block;font-family:var(--fb);font-size:9.5px;font-weight:700;letter-spacing:.05em}
+.blk.cls{color:var(--ground)}
+.blk.b293{background:var(--c293)}.blk.b205{background:var(--c205)}
+.blk.brdev{background:var(--crdev)}.blk.bmba{background:var(--cmba)}
+.blk.prep{background:var(--surface-2);color:var(--ink-2);border-left:2px solid var(--rule-2)}
+.blk.prep.p293{border-left-color:var(--c293)}.blk.prep.p205{border-left-color:var(--c205)}
+.blk.prep.prdev{border-left-color:var(--crdev)}.blk.prep.pmba{border-left-color:var(--cmba)}
+/* Office hours draw over reserved blocks, not under them: "you are at Novin
+   during Hamstead's office hours" is exactly the collision worth seeing. */
+.blk.oh{background:var(--accent-soft);
+  background:color-mix(in srgb,var(--ground) 84%,transparent);
+  border:1px dashed var(--accent);color:var(--accent);z-index:3}
+.open{position:absolute;left:0;right:0;background:var(--accent-soft);z-index:1}
+.open i{position:absolute;bottom:4px;left:0;right:0;text-align:center;font-size:9.5px;
+  font-style:normal;color:var(--accent);letter-spacing:.1em;font-weight:600}
+/* Cross-area blocks: work and the capstone claim the same open days. */
+.blk.novin{background:var(--a-novin);color:var(--ground)}
+.blk.capstone{background:var(--a-life);color:var(--ground)}
+.wklegend{display:flex;flex-wrap:wrap;gap:8px 20px;margin-top:14px;font-family:var(--fd);
+  font-style:italic;font-size:13px;color:var(--muted);align-items:center}
+.wklegend b{font-family:var(--fb);font-style:normal;font-size:12px;font-weight:600;color:var(--ink-2)}
+.wknote{margin-top:24px;border:none;border-top:2px solid var(--accent);border-radius:0;
+  background:none;padding:13px 0 0}
+.wknote h4{font-family:var(--fb);font-size:10.5px;font-weight:700;letter-spacing:.2em;
+  text-transform:uppercase;margin-bottom:8px;color:var(--accent)}
+.wknote p{margin:0 0 9px;font-size:14.5px;line-height:1.6;color:var(--ink-2)}
+.wknote p:last-child{margin-bottom:0}
+/* A seven-column time grid can't reflow into a phone, so below 760px it
+   scrolls sideways inside its own wrapper rather than vanishing. It used to
+   be display:none, which left the legend above explaining Solid / Bordered /
+   Dashed / Tinted for a grid that was no longer on the page. The
+   `.wkfallback` rules that were supposed to cover that case are gone: no
+   element has ever carried the class, so they were dead in CSS only. */
+.wkscroll{overflow-x:auto}
+@media (max-width:760px){.wk{min-width:660px}}
+
+/* ---- course cards ----
+   Ruled blocks, like the area blocks on the front page: the colour is
+   carried by the rule over each one. */
+.courses{display:grid;gap:36px 34px;grid-template-columns:repeat(auto-fit,minmax(320px,1fr))}
+.card{background:none;border:none;border-radius:0;box-shadow:none;overflow:visible;
+  display:flex;flex-direction:column;border-top:2px solid var(--rule-2)}
+.card.k293{border-top-color:var(--c293)}
+.card.k205{border-top-color:var(--c205)}
+.card.krdev{border-top-color:var(--crdev)}
+.card.kmba{border-top-color:var(--cmba)}
+.card.kcap{border-top-color:var(--ccap)}
+.card > .top{padding:13px 0 0;border-top:none}
+.card .code{font-family:var(--fd);font-style:italic;font-size:14px;font-weight:400;letter-spacing:0}
+.card.k293 .code{color:var(--c293)}.card.k205 .code{color:var(--c205)}
+.card.krdev .code{color:var(--crdev)}.card.kmba .code{color:var(--cmba)}
+.card.kcap .code{color:var(--ccap)}
+.card h3{font-size:20px;font-weight:600;letter-spacing:-.02em;margin:2px 0 9px}
+.meta{font-size:13px;color:var(--ink-2);line-height:1.7}
+.meta em{font-style:italic;font-family:var(--fd);color:var(--muted)}
+.card .grades{border-top:1px solid var(--rule);padding:14px 0;margin-top:14px}
+.grades table{width:100%;border-collapse:collapse;font-size:13.5px}
+.grades td{padding:4px 0;vertical-align:baseline}
+.grades td:last-child{text-align:right;font-weight:600;font-size:12.5px;white-space:nowrap;
+  padding-left:10px;font-variant-numeric:tabular-nums}
+.grades .barline{height:4px;border-radius:0;background:var(--surface-2);margin-top:11px;
+  display:flex;overflow:hidden}
+.grades .barline i{display:block;height:100%}
+.card .policies{border-top:1px solid var(--rule);padding:14px 0 0;font-size:13.5px;
+  color:var(--ink-2);line-height:1.55}
+.card .policies ul{margin:0;padding-left:16px;display:flex;flex-direction:column;gap:6px}
+.card .policies li::marker{color:var(--rule-2)}
+.card .policies strong{color:var(--ink)}
+
+/* ---- confirm list ---- */
+.confirm{display:grid;gap:0;border:none;
+  border-radius:0;overflow:visible;background:none}
+.cf{display:grid;grid-template-columns:150px minmax(0,1fr);gap:0 22px;padding:14px 0;
+  border-bottom:1px solid var(--rule);align-items:baseline}
+.cf:last-child{border-bottom:none}
+/* The tag here is a course label, so it keeps its own case like every other
+   one. It is set in the headline face rather than shouted. */
+.cf .n{font-family:var(--fd);font-style:italic;font-size:13.5px;font-weight:400;
+  color:var(--accent);letter-spacing:0;line-height:1.3}
+.cf p{margin:0;font-size:14.5px;line-height:1.55}
+.cf p em{font-style:italic;font-family:var(--fd);color:var(--muted);display:block;
+  font-size:13.5px;margin-top:3px}
+
+/* ---- colophon ---- */
+footer{margin-top:64px;padding-top:14px;border-top:2px solid var(--ink);font-size:12.5px;
+  color:var(--muted);display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap}
+.rebuild{margin-top:10px;font-size:12px;color:var(--muted)}
+
+@media (max-width:640px){
+  .day{grid-template-columns:56px minmax(0,1fr);gap:0 14px}
+  .load{height:96px}
+  .loadlabels{font-size:8px}
+  .item{grid-template-columns:minmax(0,1fr);gap:2px}
+  .item .tag{text-align:left}
+  .item .wt{justify-self:start}
+}
