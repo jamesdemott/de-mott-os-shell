@@ -14,7 +14,7 @@
 function adapt(area, raw, labels){
   return raw.map(e=>({
     id:e.id, date:e.date||null, title:e.title, kind:e.kind||"", note:e.note||"",
-    weight:e.weight||"", time:e.time||null, location:e.location||"",
+    weight:e.weight||"", weightNum:e.weightNum||0, time:e.time||null, location:e.location||"",
     repeat:e.repeat||null, status:e.status||"", hours:e.hours!=null?e.hours:null,
     project:e.project||"", added:e.added||null, course:e.course||null,
     label: e.label || (labels && e.course && labels[e.course] ? labels[e.course].code : area.name),
@@ -101,7 +101,11 @@ try{
   /* ---------- header ---------- */
   const now=new Date();
   $("eyebrow").textContent=DAYS[now.getDay()].toUpperCase()+" · "+now.getDate()+" "+MONTHS[now.getMonth()]+" "+now.getFullYear();
-  if(cfg.edition) $("edition").textContent=cfg.edition;
+  /* The edition follows the clock, the way a paper's does. Repainted with the
+     right-now line, so a tab left open all day moves on by itself. */
+  const editionOf=h=>h<12?"Morning edition":h<17?"Afternoon edition":h<21?"Evening edition":"Late edition";
+  const paintEdition=()=>{ $("edition").textContent=[cfg.edition,editionOf(new Date().getHours())].filter(Boolean).join(" · "); };
+  paintEdition();
   $("pagetitle").textContent=cfg.title;
   $("pagesub").innerHTML=cfg.sub;
   document.title=cfg.title;
@@ -122,6 +126,28 @@ try{
   ].map(s=>`<div class="stat"><b>${s.n}</b><span>${s.label}</span></div>`).join("")
    + (slipped.length?`<div class="stat slip"><b>${slipped.length}</b><span>slipped</span></div>`:"")
    + (nextDue?`<div class="stat flag" title="${nextDue.title}"><b>${relDay(nextDue.date)}</b><span>${nextDue.label} · ${clip(nextDue.title,42)}</span></div>`:"");
+
+  /* ---------- the ears ----------
+     A paper's nameplate is flanked by two small boxes — the weather, the
+     price. Here: which issue of the term this is, and how far off the next
+     big deadline sits. "Big" is a grade weight of at least ears.bigWeight, so
+     the countdown is the thing worth dreading, not the next reading response.
+     Either ear simply stays hidden when it has nothing true to say. */
+  if(cfg.ears){
+    const ears=cfg.ears;
+    const meta=ears.term?await j(ears.term).catch(()=>null):null;
+    if(meta?.termStart && TODAY>=meta.termStart && (!meta.termEnd || TODAY<=meta.termEnd)){
+      $("earL").innerHTML=`<b>No. ${daysBetween(meta.termStart,TODAY)+1}</b><i>of ${ears.termName||"the term"}</i>`;
+      $("earL").hidden=false;
+    }
+    const big=all.find(e=>e.date>=TODAY && e.kind==="due" && !e.done && (e.weightNum||0)>=(ears.bigWeight||20));
+    if(big){
+      const n=daysUntil(big.date);
+      $("earR").innerHTML=`<b>${n===0?"Today":n===1?"Tomorrow":n+" days"}</b><i>${n>1?"to ":""}${big.label} · ${clip(big.title,30)}</i>`;
+      $("earR").title=`${big.title} — ${shortDate(big.date)}${big.weight?" · "+big.weight:""}`;
+      $("earR").hidden=false;
+    }
+  }
 
   /* ---------- unclaimed time today, from the school week grid ---------- */
   const idx=(now.getDay()+6)%7;                        // week.days runs MON..SUN
@@ -166,6 +192,23 @@ try{
     return `<b>nothing scheduled today</b>${freeHrs?` <i>${freeHrs} hrs unclaimed</i>`:""}`;
   }
 
+  /* An empty day gets a headline, not an empty box — it is the one bit of
+     news that is genuinely good. The words are fixed; which ones print is
+     decided by what is true (anything slipped? any open time?), so it never
+     congratulates a day that has a slipped deadline sitting under it. */
+  function stopPress(){
+    const head=slipped.length
+      ? `A quiet day, and ${slipped.length} slipped.`
+      : "All quiet on the day desk.";
+    const stand=[
+      slipped.length?"A good day to clear the slipped list below.":"Nothing due, nothing slipped.",
+      freeHrs?`${freeHrs} hrs unclaimed.`:"",
+      nextUp?`Next up: <b>${nextUp.title}</b> — ${nextUp.label}, ${relDay(nextUp.date)}.`:""
+    ].filter(Boolean).join(" ");
+    return `<div class="stoppress"><div class="eyebrow">Stop press</div>
+      <h3>${head}</h3><p>${stand}</p></div>`;
+  }
+
   function paintToday(){
     const openTxt=openToday.length
       ? openToday.map(o=>hhmmOf(o.start)+"–"+hhmmOf(o.end)).join(", ")+` · ${freeHrs} hrs unclaimed`
@@ -178,11 +221,11 @@ try{
       <div class="rightnow" id="rightnow">${rightNow()}</div>`
       + (todays.length
           ? `<div class="today-list">${todays.map(rowFor).join("")}</div>`
-          : `<div class="empty">Nothing dated today.${nextUp?` Next up is <b>${nextUp.title}</b> — ${nextUp.label}, ${relDay(nextUp.date)} on ${shortDate(nextUp.date)}.`:""}</div>`)
+          : stopPress())
       + (openTxt?`<div class="today-foot">Open windows today: <b>${openTxt}</b></div>`:"");
   }
   paintToday();
-  setInterval(()=>{ const el=$("rightnow"); if(el) el.innerHTML=rightNow(); },30000);
+  setInterval(()=>{ const el=$("rightnow"); if(el) el.innerHTML=rightNow(); paintEdition(); },30000);
 
   /* ---------- is anything quietly broken? ----------
      Every background piece here can fail silently: a Notion pull that 404s for

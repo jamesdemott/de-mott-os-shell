@@ -194,6 +194,27 @@ section{margin-top:52px}
 .tick.on{background:var(--area,var(--accent));border-color:var(--area,var(--accent));
   color:var(--ground);font-weight:700}
 .isdone .ttl{text-decoration:line-through;opacity:.45}
+
+/* ---- the stamp ----
+   Lands on a row as it is ticked off, holds, then lifts away (js/rows.js
+   adds and removes it). A rubber stamp, so: an outlined box in the accent,
+   letterspaced caps, a random slight tilt. The one piece of motion on the
+   site that is there for pleasure, so it must never cost anything — it
+   ignores the pointer and takes no layout space. */
+.row,.hitem,.litem,.rvrow{position:relative}
+.stamp{position:absolute;right:16%;top:50%;pointer-events:none;z-index:2;
+  font-family:var(--fb);font-size:14px;font-weight:700;letter-spacing:.22em;
+  text-transform:uppercase;white-space:nowrap;color:var(--accent);
+  border:2.5px solid var(--accent);padding:3px 10px 3px 13px;background:var(--ground);
+  mix-blend-mode:multiply;animation:stamp 1.9s cubic-bezier(.2,.9,.3,1.2) forwards}
+:root[data-theme="dark"] .stamp{mix-blend-mode:normal}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .stamp{mix-blend-mode:normal}}
+@keyframes stamp{
+  0%  {opacity:0;transform:translateY(-50%) rotate(var(--tilt)) scale(1.9)}
+  14% {opacity:1;transform:translateY(-50%) rotate(var(--tilt)) scale(.96)}
+  22% {transform:translateY(-50%) rotate(var(--tilt)) scale(1)}
+  78% {opacity:1;transform:translateY(-50%) rotate(var(--tilt)) scale(1)}
+  100%{opacity:0;transform:translateY(-50%) rotate(var(--tilt)) scale(1)}}
 .isdone .tag,.isdone .nt,.isdone .when,.isdone .wt{opacity:.45}
 
 /* ---- capture ----

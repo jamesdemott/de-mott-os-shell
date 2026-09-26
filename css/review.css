@@ -3,6 +3,14 @@
    one decision row per item, and a step with nothing in it says so and gets
    out of the way. Broadsheet rules throughout — see "The look" in CLAUDE.md. */
 
+/* The Sunday Edition's standfirst opens with a drop cap, two lines deep and
+   set upright against the italic — the oldest way in print to say "the
+   reading starts here". It lives on this page because this is the one
+   standfirst that is a real paragraph, left-aligned, meant to be read. */
+#pagesub::first-letter{float:left;font-style:normal;font-weight:600;
+  font-size:3.05em;line-height:.82;margin:.07em .09em 0 0;color:var(--ink)}
+
+
 .steps{display:flex;flex-direction:column;gap:44px}
 .step .shead h2{display:flex;align-items:baseline;gap:12px}
 .step.clear{opacity:.55}

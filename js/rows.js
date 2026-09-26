@@ -194,6 +194,26 @@ const Rows = {
     });
   },
 
+  /* ---- the stamp ----
+     Ticking something off lands a rubber stamp on the row, which then fades.
+     The one bit of ceremony on the site, and it is on the action worth
+     repeating. Words are newsroom slang for finished — "put to bed" is what
+     a paper says when the edition has gone to press. Reduced motion skips it:
+     the strike-through already says done. */
+  STAMPS: ["Filed", "Done", "Put to bed", "Printed", "Signed off", "Closed"],
+  stamp(btn){
+    const row = btn.closest(".row,.hitem,.litem,.rvrow");
+    if(!row || matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    row.querySelector(".stamp")?.remove();
+    const s = document.createElement("span");
+    s.className = "stamp";
+    s.setAttribute("aria-hidden", "true");
+    s.textContent = this.STAMPS[Math.floor(Math.random() * this.STAMPS.length)];
+    s.style.setProperty("--tilt", (-4 - Math.random() * 7).toFixed(1) + "deg");
+    row.appendChild(s);
+    s.addEventListener("animationend", () => s.remove());
+  },
+
   /* ---- wiring ---- */
   wire(){
     /* tick off — optimistic, so it feels instant; reverts if the write fails */
@@ -207,6 +227,7 @@ const Rows = {
         b.closest(".row,.hitem,.litem")?.classList.toggle("isdone", on);
       });
       paint(next);
+      if(next) this.stamp(btn);
       try{ await post("/api/done", { id: key, done: next }); }
       catch(err){ paint(!next); this.toast("Couldn't save that: " + err.message); }
     });
