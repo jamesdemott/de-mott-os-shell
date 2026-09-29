@@ -23,6 +23,13 @@ const STALE_DAYS = 14;      // how long an undated capture may sit before it's a
 (async function(){
 try{
   const cfg=await j("data/areas.json");
+  /* Titled by the week it prepares — "Week 7 preview" on a Sunday — because
+     the pass looks forward (James, 2026-09-29; it was "The Sunday Edition",
+     then nearly "Week 6, reviewed", which pointed the wrong way). */
+  const meta=cfg.ears?.term?await j(cfg.ears.term).catch(()=>null):null;
+  const pvTitle=weekTitle(meta,previewMonday(TODAY))+" preview";
+  document.getElementById("pagetitle").textContent=pvTitle;
+  document.title=pvTitle+" · De Mott OS";
   Nav.render(cfg,"review");
   const state=await j("data/state.json").catch(()=>({done:{},undo:[]}));
   const done=state.done||{};

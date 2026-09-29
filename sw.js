@@ -14,7 +14,7 @@
  * shell's own bytes, so a deploy that changes nothing evicts nothing, and a
  * deploy that changes anything evicts everything.
  */
-const VERSION = "9fa678409efb";
+const VERSION = "e3a08f8a72ca";
 const SHELL   = [
   "capture.html",
   "css/base.css",

@@ -299,6 +299,22 @@ const workable   = week => Math.max(0, capacityOf(week) - restOf(week));
    his, not a guess. The machinery stays, so turning it back on is one word. */
 const hoursOn    = cfg => !(cfg && cfg.hoursRead === false);
 
+/* The week the weekly pass looks at: on a weekend, the coming one; midweek,
+   the current one. Shared by the paper (edition.js) and the review, which
+   are the front and the inside of the same week. Returns its Monday. */
+function previewMonday(today){
+  const dow = parseISO(today).getDay();                      // 0 = Sunday
+  return dow === 0 ? addDays(today, 1) : dow === 6 ? addDays(today, 2) : addDays(today, -(dow - 1));
+}
+/* "Week 6" inside the term (meta.json's termStart/termEnd), "Week of 21 Dec"
+   outside it. The weekly paper and the review are titled by this. */
+function weekTitle(meta, monday){
+  const inTerm = meta && meta.termStart && monday >= meta.termStart && (!meta.termEnd || monday <= meta.termEnd);
+  if(inTerm) return "Week " + (Math.floor(daysBetween(meta.termStart, monday) / 7) + 1);
+  const d = parseISO(monday);
+  return "Week of " + d.getDate() + " " + MONTHS[d.getMonth()].slice(0, 3);
+}
+
 /* His Google calendars (data/calendar/events.json), split the way every
    calendar app splits them: timed events are rows, all-day ones are a note
    on the day. 44 of the first 96 events were all-day reminders — trash day,

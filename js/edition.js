@@ -35,8 +35,7 @@ try{
   const $=id=>document.getElementById(id);
 
   /* On a weekend it is next week's paper; midweek it is this week's. */
-  const dow=parseISO(TODAY).getDay();                  // 0 = Sunday
-  let start=dow===0?addDays(TODAY,1):dow===6?addDays(TODAY,2):addDays(TODAY,-(dow-1));
+  let start=previewMonday(TODAY);
   /* ?week=2026-10-05 previews any week (snapped back to its Monday) — for
      looking at next week's paper early, and for testing the nameplate. */
   const wq=new URLSearchParams(location.search).get("week");
@@ -119,7 +118,7 @@ try{
   const termWeeks=inTerm&&meta.termEnd?Math.ceil((daysBetween(meta.termStart,meta.termEnd)+1)/7):null;
   const weekNo=inTerm?Math.floor(daysBetween(meta.termStart,start)/7)+1:null;
   const short=ds=>{const d=parseISO(ds);return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`;};
-  const edTitle=weekNo?`Week ${weekNo}`:`Week of ${short(start)}`;
+  const edTitle=weekTitle(meta,start);
   const heavy=dues.filter(e=>turnIn(e)&&e.weightNum>=bigW).sort((a,b)=>b.weightNum-a.weightNum)[0];
   const edTag=heavy?`the ${clip(heavy.title.replace(/\s+—.*$/,""),48)} week`:"";
   const edDates=`${short(start)} – ${short(end)}${termWeeks?` · of ${termWeeks}`:""}`;
