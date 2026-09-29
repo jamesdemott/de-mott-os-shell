@@ -61,7 +61,7 @@ try{
   const dues=work.filter(e=>e.kind==="due");
   const hrs=work.reduce((s,e)=>s+hoursOf(e),0);
   const guessed=work.filter(estimated).length;
-  const capacity=(week?.open||[]).reduce((s,o)=>s+(o.end-o.start),0);
+  const capacity=capacityOf(week), rest=restOf(week), room=workable(week);
   const slipped=stored.filter(e=>e.date&&e.date<TODAY&&!done[e.id]&&!e.repeat&&!e.status
     &&(e.kind==="due"||e.kind==="admin"||e.kind===""));
   const someday=stored.filter(e=>e.status==="someday"&&!done[e.id]).length;
@@ -75,11 +75,12 @@ try{
      thing landing this week, then whether the week fits, then its shape. */
   const big=dues.slice().sort((a,b)=>b.weightNum-a.weightNum)[0];
   const bigW=cfg.ears?.bigWeight||20;
-  const over=capacity>0&&hrs>capacity;
+  const over=capacity>0&&hrs>capacity, tight=!over&&capacity>0&&hrs>room;
   const clip=(t,n)=>t.length>n?t.slice(0,n-1).trimEnd()+"…":t;
   const headline =
       big&&big.weightNum>=bigW ? `${clip(big.title,64)} lands ${DAYS[parseISO(big.date).getDay()]}.`
     : over                     ? `An overbooked week: ${fmtHours(hrs)} of work, ${fmtHours(capacity)} free.`
+    : tight                    ? `A full week: it fits, with less than ${fmtHours(rest)} left for you.`
     : !dues.length             ? "A quiet week."
     : `${dues.length} deadline${dues.length===1?"":"s"}, none of them heavy.`;
   $("ed-headline").textContent=headline;
@@ -90,14 +91,15 @@ try{
     big&&big.weightNum>=bigW?`${big.label}, worth ${big.weight||big.weightNum+"%"}.`:"",
     `${dues.length} thing${dues.length===1?"":"s"} due`
       +(nMeet?` and ${nMeet} meeting${nMeet===1?"":"s"} on the calendar`:"")+".",
-    capacity?`About ${fmtHours(hrs)} of the ${fmtHours(capacity)} unclaimed is spoken for${guessed?", estimated":""}.`:"",
+    capacity?`About ${fmtHours(hrs)} of the ${fmtHours(capacity)} unclaimed is spoken for${guessed?", estimated":""}`
+      +(rest?(tight||over?`, leaving less than the ${fmtHours(rest)} you keep for yourself.`:`, and your ${fmtHours(rest)} for yourself is intact.`):".") :"",
     slipped.length?`${slipped.length} still open from before.`:""
   ].filter(Boolean);
   $("ed-stand").textContent=stand.join(" ");
 
   $("ed-figures").innerHTML=[
     {n:dues.length,label:"due"},
-    {n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over},
+    {n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over||tight},
     {n:slipped.length,label:"carried over",warn:slipped.length>0},
     {n:closed.length,label:"closed last week"},
     {n:someday,label:"on someday"}

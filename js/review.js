@@ -95,7 +95,7 @@ try{
 
   /* ---------- header ---------- */
   const decisions=slipped.length+sitting.length+parked.length;
-  const capacity=(week?.open||[]).reduce((s,o)=>s+(o.end-o.start),0);
+  const capacity=capacityOf(week), rest=restOf(week), room=workable(week);
   const aheadHrs=soon.filter(e=>!done[e.key]).reduce((s,e)=>s+hoursOf(e),0);
 
   $("statrow").innerHTML=[
@@ -103,7 +103,7 @@ try{
     {n:slipped.length, label:"carried over", flag:false},
     {n:closed.length, label:"closed in the last 7 days", flag:false}
   ].map(s=>`<div class="stat${s.flag?" flag":""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("")
-   + (capacity?`<div class="stat${aheadHrs>capacity?" slip":""}"><b>${fmtHours(aheadHrs)}</b><span>next 7 days, against ${fmtHours(capacity)} free</span></div>`:"");
+   + (capacity?`<div class="stat${aheadHrs>room?" slip":""}"><b>${fmtHours(aheadHrs)}</b><span>next 7 days, against ${fmtHours(capacity)} free</span></div>`:"");
 
   /* ---------- one row, with the decisions on it ---------- */
   const styleOf=a=>`--area:var(${a.accent});--areabg:var(${a.accent}-bg)`;
@@ -167,7 +167,10 @@ try{
 
     step(4,"The week ahead",
       (capacity
-        ? `Read-only. ${fmtHours(aheadHrs)} of work against ${fmtHours(capacity)} genuinely unclaimed — ${aheadHrs>capacity?"<b>that doesn't fit.</b> Better to move something now, on purpose, than have it carried over later.":"that fits."}`
+        ? `Read-only. ${fmtHours(aheadHrs)} of work against ${fmtHours(capacity)} genuinely unclaimed — ${aheadHrs>capacity
+            ?"<b>that doesn't fit.</b> Better to move something now, on purpose, than have it carried over later."
+            :aheadHrs>room?`it fits, <b>but leaves less than ${fmtHours(rest)} for you.</b> Worth moving one thing, or deciding which evening stays free.`
+            :rest?`that fits, with at least ${fmtHours(rest)} left for you.`:"that fits."}`
         : "Read-only — what's actually coming.")+forYouLine,
       list(soon.map(e=>`<div class="rvrow ${e.kind}" style="${styleOf(e.area)}">
           <span class="tickcell"></span>

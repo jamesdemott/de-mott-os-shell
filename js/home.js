@@ -93,6 +93,10 @@ try{
     readonly:true, calendar:true, area:CAL, key:"cal:"+c.uid
   }));
 
+  /* What to wear, from his "New Smells" sheet (js/scent.js). Loaded up
+     front so the weather callback below can repaint it whenever it lands. */
+  const scentData=cfg.scent?await j(cfg.scent).catch(()=>null):null;
+
   const stored=feeds.filter(f=>onHome(f.area)).flatMap(f=>f.items);
   const parked=stored.filter(e=>e.status==="someday").length;
 
@@ -140,6 +144,26 @@ try{
    + (slipped.length?`<div class="stat slip"><b>${slipped.length}</b><span>carried over</span></div>`:"")
    + (nextDue?`<div class="stat flag" title="${nextDue.title}"><b>${relDay(nextDue.date)}</b><span>${nextDue.label} · ${clip(nextDue.title,42)}</span></div>`:"");
 
+  /* ---------- what to wear ----------
+     A day's context for js/scent.js: what is on it (private areas are
+     filtered inside Scent.pick), whether it is a Novin office day by the
+     weekly grid (skipping its holidays), whether a class meets, and the
+     forecast once it lands. Painted now, and again when the weather arrives. */
+  let wxNow=null;
+  const scentCtx=ds=>{
+    const wd=(parseISO(ds).getDay()+6)%7, hol=(week?.holidays||[]).includes(ds);
+    return { items:all.filter(e=>e.date===ds),
+      officeDay:!hol&&(week?.blocks||[]).some(b=>b.type==="novin"&&b.day===wd),
+      classDay:all.some(e=>e.date===ds&&e.kind==="class"),
+      forecast:wxNow?.days?.find(x=>x.date===ds)||null };
+  };
+  function paintScent(){
+    if(!scentData||typeof Scent==="undefined") return;
+    $("scentpanel").innerHTML=Scent.card(scentData,Scent.pick(scentData,scentCtx(TODAY)));
+    $("s-scent").hidden=false;
+  }
+  paintScent();
+
   /* ---------- the ears ----------
      A paper's nameplate is flanked by two small boxes — the weather, the
      price. Here: the weather, and how far off the next big deadline sits.
@@ -153,9 +177,23 @@ try{
       $("eyebrow").textContent+=` · No. ${daysBetween(meta.termStart,TODAY)+1}`;
       $("eyebrow").title=`Issue ${daysBetween(meta.termStart,TODAY)+1} of ${ears.termName||"the term"}`;
     }
+    /* How much of the term is behind him: a printed ruler, one tick a week,
+       inked up to today. Days, not weeks, drive the fill so it moves daily;
+       the label counts in weeks because that is how a term is lived.
+       Asked for 2026-09-29. Hidden outside the term, and in the late edition. */
+    if(meta?.termStart && meta.termEnd && TODAY>=meta.termStart && TODAY<=meta.termEnd){
+      const total=daysBetween(meta.termStart,meta.termEnd)+1, gone=daysBetween(meta.termStart,TODAY)+1;
+      const weeks=Math.ceil(total/7), wk=Math.floor((gone-1)/7)+1, pct=Math.round(gone/total*100);
+      const left=total-gone;
+      $("termbar").innerHTML=`<span class="tlabel">${ears.termName?ears.termName.replace(/^the /,"").replace(/^./,c=>c.toUpperCase()):"The term"}</span>
+        <span class="truler" style="--fill:${(gone/total*100).toFixed(1)}%;--weeks:${weeks}" title="${gone} of ${total} days · ends ${shortDate(meta.termEnd)}"><i></i></span>
+        <span class="tcount"><b>Week ${wk} of ${weeks}</b> · ${pct}% through · ${left} day${left===1?"":"s"} left</span>`;
+      $("termbar").hidden=false;
+    }
     /* Not awaited: the page must not wait on someone else's server. The ear
        fills in when the answer lands, or never, and either is fine. */
     if(ears.weather && typeof Weather!=="undefined") Weather.get(ears.weather).then(w=>{
+      wxNow=w; paintScent(); try{ paintLate(); }catch(_){}   // late edition may not exist yet
       const d=w?.days?.[0]; if(!w?.now || !d) return;
       $("earL").innerHTML=`<b>${w.now.temp}° <span class="wx">${Weather.words(w.now.code)}</span></b>`
         + `<i>${ears.weather.place} · high ${d.hi}°${d.rain>=20?` · ${d.rain}% rain`:""}</i>`;
@@ -290,10 +328,14 @@ try{
         +`${open.length===1?"It":"They"}'ll be carried over, and that's fine.`:"",
       "Nothing on the list needs you tonight."
     ].filter(Boolean);
+    /* Laying tomorrow's scent out tonight is one decision fewer in the
+       morning — the same move as the rest of the note. */
+    const lay=scentData&&typeof Scent!=="undefined"?Scent.pick(scentData,scentCtx(day)).day:null;
     $("s-late").innerHTML=`<div class="latenote">
         <div class="eyebrow">Late edition</div>
         <h2>${head}</h2>
         <p>${lines.join(" ")}</p>
+        ${lay?`<p class="latelay">Lay out <b>${lay.row.scent}</b> — ${lay.row.mood}, ${lay.reason}.</p>`:""}
         <button type="button" class="mini" id="fullpaper">show the full paper</button>
       </div>`;
     $("fullpaper").onclick=()=>{ try{ sessionStorage.setItem(lateKey,"1"); }catch(_){}
@@ -515,11 +557,11 @@ try{
      data/week.json, which is the only number here that can say "this doesn't
      fit" before the week arrives. Nothing off the shelf can compute it,
      because nothing else knows both the class schedule and the Novin hours. */
-  const capacity=(week?.open||[]).reduce((s,o)=>s+(o.end-o.start),0);
+  const capacity=capacityOf(week), rest=restOf(week), room=workable(week);
   cols.forEach(c=>{
     c.hrs=c.items.filter(e=>!e.done).reduce((s,e)=>s+hoursOf(e),0);
     c.guessed=c.items.filter(e=>!e.done&&estimated(e)).length;
-    c.over=capacity>0&&c.hrs>capacity;
+    c.over=capacity>0&&c.hrs>room;
   });
 
   const peak=Math.max(...cols.map(c=>c.items.length), 4);   // a little headroom, so a busy week visibly towers
@@ -530,7 +572,7 @@ try{
     const n=c.items.length;
     const cells=c.items.map(e=>
       `<i style="background:var(${e.area.accent})${e.done?";opacity:.3":""}" title="${e.area.name} · ${e.title} · ${fmtHours(hoursOf(e))}${estimated(e)?" (estimated)":""}"></i>`).join("");
-    const fit=capacity>0?` — ${fmtHours(c.hrs)} of work against ${fmtHours(capacity)} unclaimed`:"";
+    const fit=capacity>0?` — ${fmtHours(c.hrs)} of work against ${fmtHours(capacity)} unclaimed${rest?`, ${fmtHours(rest)} of it kept for you`:""}`:"";
     return `<div class="lbar${i===0?" now":""}${c.over?" over":""}" title="week of ${shortDate(c.from)} — ${n?n+(n===1?" item":" items"):"nothing due"}${fit}">
       <div class="cells">${cells}</div></div>`;
   }).join("");
@@ -545,8 +587,9 @@ try{
   const tight=cols.filter(c=>c.over).map(c=>{const d=parseISO(c.from);return MONTHS[d.getMonth()].slice(0,3)+" "+d.getDate();});
   const guessed=cols.reduce((s,c)=>s+c.guessed,0);
   $("loadkey").innerHTML=`<span><b>One cell = one deliverable.</b> The outlined week is this one.</span>`
-    + (capacity?`<span><b>${fmtHours(capacity)} a week unclaimed</b> — the open windows in the weekly grid, after class, prep, Novin and the capstone.</span>`:"")
-    + (tight.length?`<span class="over"><b>Over capacity:</b> ${tight.join(", ")}.</span>`:"")
+    + (capacity?`<span><b>${fmtHours(capacity)} a week unclaimed</b> — the open windows in the weekly grid, after class, prep, Novin and the capstone.`
+        +(rest?` A week fits if it leaves <b>${fmtHours(rest)} for you</b>, wherever they fall.`:"")+`</span>`:"")
+    + (tight.length?`<span class="over"><b>${rest?"No room left for you:":"Over capacity:"}</b> ${tight.join(", ")}.</span>`:"")
     + (quiet.length?`<span><b>Clear weeks:</b> ${quiet.join(", ")}.</span>`:"")
     + (guessed?`<span>${guessed} item${guessed===1?" has":"s have"} an estimated duration — set a real one with <code>~2h</code> on capture, or in the row editor.</span>`:"")
     + `<span>${cfg.areas.filter(a=>a.live&&onHome(a)).map(a=>`<em style="background:var(${a.accent})"></em>${a.name}`).join(" &nbsp; ")}</span>`;

@@ -279,6 +279,16 @@ const repeatLabel = r => {
    number at all. Estimated values are marked as such wherever they're shown. */
 const HOUR_DEFAULTS = { due: 2, admin: 0.5, class: 0, "": 1 };
 const hoursOf   = e => e.hours != null ? e.hours : (HOUR_DEFAULTS[e.kind] ?? 1);
+
+/* Capacity, and the floating rest budget inside it. `open` windows in
+   data/week.json are the time genuinely unclaimed; `restHours` is how much of
+   that a week must leave over to count as fitting — not a fenced-off block,
+   because a Saturday-night deadline may need Saturday (James, 2026-09-29).
+   It is slack in the proven sense: the reserve is real, its position floats.
+   Every page that says "fits" asks workable(), never capacity alone. */
+const capacityOf = week => (week?.open || []).reduce((s, o) => s + (o.end - o.start), 0);
+const restOf     = week => Math.max(0, +(week?.restHours) || 0);
+const workable   = week => Math.max(0, capacityOf(week) - restOf(week));
 const estimated = e => e.hours == null;
 const fmtHours  = h => (Math.round(h * 10) / 10) + "h";
 
