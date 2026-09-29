@@ -20,6 +20,13 @@
   margin:12px auto 0;max-width:62ch}
 .ed-lead .statrow{justify-content:center}
 
+/* For you this week — one ruled line under the figures, deliberately quiet:
+   a nudge, not an alarm, so it never takes the accent. */
+.ed-foryou{margin:0;padding:10px 0;border-bottom:1px solid var(--rule-2);
+  font-family:var(--fd);font-style:italic;font-size:15.5px;color:var(--ink-2)}
+.ed-foryou b{font-style:normal;font-weight:600;color:var(--ink);margin-right:4px}
+.ed-foryou span{color:var(--muted)}
+
 /* The week: two columns of days, read down then across, like a listings page. */
 .ed-week{columns:2;column-gap:40px;column-rule:1px solid var(--rule);margin-top:34px}
 .ed-day{break-inside:avoid;padding:0 0 18px}

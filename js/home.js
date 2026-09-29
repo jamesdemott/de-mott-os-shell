@@ -116,7 +116,7 @@ try{
   $("eyebrow").textContent=DAYS[now.getDay()].toUpperCase()+" · "+now.getDate()+" "+MONTHS[now.getMonth()]+" "+now.getFullYear();
   /* The edition follows the clock, the way a paper's does. Repainted with the
      right-now line, so a tab left open all day moves on by itself. */
-  const editionOf=h=>h<12?"Morning edition":h<17?"Afternoon edition":h<21?"Evening edition":"Late edition";
+  const editionOf=h=>h<5||h>=21?"Late edition":h<12?"Morning edition":h<17?"Afternoon edition":"Evening edition";
   const paintEdition=()=>{ $("edition").textContent=[cfg.edition,editionOf(new Date().getHours())].filter(Boolean).join(" · "); };
   paintEdition();
   $("pagetitle").textContent=cfg.title;
@@ -137,7 +137,7 @@ try{
     {n:soon.length, label:"in the next "+cfg.horizonDays+" days"},
     {n:soon.filter(e=>e.kind==="due").length, label:"of those are due dates"}
   ].map(s=>`<div class="stat"><b>${s.n}</b><span>${s.label}</span></div>`).join("")
-   + (slipped.length?`<div class="stat slip"><b>${slipped.length}</b><span>slipped</span></div>`:"")
+   + (slipped.length?`<div class="stat slip"><b>${slipped.length}</b><span>carried over</span></div>`:"")
    + (nextDue?`<div class="stat flag" title="${nextDue.title}"><b>${relDay(nextDue.date)}</b><span>${nextDue.label} · ${clip(nextDue.title,42)}</span></div>`:"");
 
   /* ---------- the ears ----------
@@ -220,10 +220,10 @@ try{
      congratulates a day that has a slipped deadline sitting under it. */
   function stopPress(){
     const head=slipped.length
-      ? `A quiet day, and ${slipped.length} slipped.`
+      ? `A quiet day, and ${slipped.length} carried over.`
       : "All quiet on the day desk.";
     const stand=[
-      slipped.length?"A good day to clear the slipped list below.":"Nothing due, nothing slipped.",
+      slipped.length?"A good day to give those a new date.":"Nothing due, nothing carried over.",
       freeHrs?`${freeHrs} hrs unclaimed.`:"",
       nextUp?`Next up: <b>${nextUp.title}</b> — ${nextUp.label}, ${relDay(nextUp.date)}.`:""
     ].filter(Boolean).join(" ");
@@ -247,7 +247,60 @@ try{
       + (openTxt?`<div class="today-foot">Open windows today: <b>${openTxt}</b></div>`:"");
   }
   paintToday();
-  setInterval(()=>{ const el=$("rightnow"); if(el) el.innerHTML=rightNow(); paintEdition(); },30000);
+
+  /* ---------- the late edition: a shutdown, not a scroll ----------
+     From 21:00 until 05:00 the page stops being a list of everything and
+     becomes one short note: what tomorrow starts with, and the reassurance
+     that the rest is written down. Two findings behind it: writing tomorrow's
+     to-dos before bed gets people to sleep faster (Scullin et al., 2018), and
+     unfinished tasks stop intruding once they have a plan attached
+     (Masicampo & Baumeister, 2011) — the same idea as Newport's shutdown
+     ritual. The pile, the counts and the countdown ear are exactly what keeps
+     a mind running at eleven at night, so they wait for the morning edition.
+
+     "Show the full paper" is always one click, and only for tonight: the
+     choice is keyed to the date in sessionStorage (wrapped — private windows
+     throw), so tomorrow night the late edition is back by default.
+     James asked for this on 2026-09-29. */
+  const lateKey="dmos:fullpaper:"+TODAY;
+  const isLate=()=>{ const h=new Date().getHours(); return h>=21||h<5; };
+  const wantsFull=()=>{ try{ return sessionStorage.getItem(lateKey)==="1"; }catch(_){ return false; } };
+  function paintLate(){
+    const on=isLate()&&!wantsFull();
+    document.body.classList.toggle("late",on);
+    $("s-late").hidden=!on;
+    if(!on) return;
+    const afterMidnight=new Date().getHours()<5;
+    const day=afterMidnight?TODAY:addDays(TODAY,1);
+    const word=afterMidnight?"Today":"Tomorrow";
+    const next=all.filter(e=>e.date===day&&!e.done);
+    const timed=next.filter(e=>e.time&&e.time.start).sort((a,b)=>a.time.start.localeCompare(b.time.start));
+    const due=next.filter(e=>e.kind==="due"||e.kind==="admin");
+    const first=timed[0]||due[0]||next[0];
+    const head=!first ? `${word} is clear.`
+      : first.time ? `${word} starts with ${first.title}, at ${first.time.start}.`
+      : `${word} starts with ${first.title}.`;
+    const others=next.length-(first?1:0);
+    const open=afterMidnight?[]:todays.filter(e=>!e.done&&tickable(e)&&e.kind!=="event");
+    const lines=[
+      first?`${first.label}${first.location?" · "+first.location:""}.`:"",
+      others>0?`${others} other thing${others===1?" is":"s are"} written down for ${word.toLowerCase()}, and everything after that is too.`
+              :"Everything after that is written down.",
+      open.length?`${open.length===1?"One thing":open.length+" things"} from today ${open.length===1?"is":"are"} still open. `
+        +`${open.length===1?"It":"They"}'ll be carried over, and that's fine.`:"",
+      "Nothing on the list needs you tonight."
+    ].filter(Boolean);
+    $("s-late").innerHTML=`<div class="latenote">
+        <div class="eyebrow">Late edition</div>
+        <h2>${head}</h2>
+        <p>${lines.join(" ")}</p>
+        <button type="button" class="mini" id="fullpaper">show the full paper</button>
+      </div>`;
+    $("fullpaper").onclick=()=>{ try{ sessionStorage.setItem(lateKey,"1"); }catch(_){}
+      document.body.classList.remove("late"); $("s-late").hidden=true; };
+  }
+  paintLate();
+  setInterval(()=>{ const el=$("rightnow"); if(el) el.innerHTML=rightNow(); paintEdition(); paintLate(); },30000);
 
   /* ---------- is anything quietly broken? ----------
      Every background piece here can fail silently: a Notion pull that 404s for

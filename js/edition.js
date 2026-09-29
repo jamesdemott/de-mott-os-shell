@@ -98,10 +98,28 @@ try{
   $("ed-figures").innerHTML=[
     {n:dues.length,label:"due"},
     {n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over},
-    {n:slipped.length,label:"slipped",warn:slipped.length>0},
+    {n:slipped.length,label:"carried over",warn:slipped.length>0},
     {n:closed.length,label:"closed last week"},
     {n:someday,label:"on someday"}
   ].map(s=>`<div class="stat${s.warn?" slip":""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("");
+
+  /* ---------- for you this week ----------
+     Behavioral activation — the best-evidenced piece of CBT for low mood —
+     comes down to deliberately booking things that are enjoyable or
+     meaningful, not only obligations. Everything else on this page is an
+     obligation, so this line asks the one question it can't: is anything
+     here just for you? What counts is cfg.forYou (areas, and calendars by
+     name). When nothing does, it says so plainly, once, and points at the
+     review, which asks the same question. Never a score, never a streak. */
+  const fy=cfg.forYou||{areas:[],calendars:[]};
+  const mine=inWeek.filter(e=>(fy.areas||[]).includes(e.area.id)&&e.kind!=="class")
+    .concat(meetings.filter(m=>(fy.calendars||[]).includes(m.label)))
+    .sort((a,b)=>a.date<b.date?-1:1);
+  $("ed-foryou").innerHTML=mine.length
+    ? `<b>For you this week:</b> ${mine.slice(0,5).map(e=>`${e.title} <span>(${DAYS[parseISO(e.date).getDay()]})</span>`).join(" · ")}`
+      +(mine.length>5?` · and ${mine.length-5} more`:"")
+    : `<b>For you this week:</b> nothing booked just for you yet — worth fixing in the review.`;
+  $("ed-foryou").classList.toggle("none",!mine.length);
 
   /* ---------- the week, day by day ---------- */
   const row=e=>`<div class="ed-row ${e.kind}${e.done?" isdone":""}" style="--area:var(${e.area.accent})">

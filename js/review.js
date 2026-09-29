@@ -66,6 +66,19 @@ try{
     .filter(e=>e.date && e.date>=TODAY && e.date<=addDays(TODAY,7) && e.kind!=="class")
     .sort((a,b)=>a.date<b.date?-1:a.date>b.date?1:0);
 
+  /* Anything in the coming week that is just for him — the review's version
+     of the Sunday Edition's "For you this week" line. Behavioral activation:
+     book the good things on purpose, not only the obligations. What counts is
+     cfg.forYou. Asked once, in the week-ahead step, in plain words. */
+  const fy=cfg.forYou||{areas:[],calendars:[]};
+  const cal=(fy.calendars||[]).length&&cfg.calendar?await j(cfg.calendar).catch(()=>null):null;
+  const forYou=soon.filter(e=>(fy.areas||[]).includes(e.area.id)).map(e=>e.title)
+    .concat((cal?.items||[]).filter(c=>(fy.calendars||[]).includes(c.calendar)
+      && c.date>=TODAY && c.date<=addDays(TODAY,7)).map(c=>c.title));
+  const forYouLine=forYou.length
+    ? ` <br><b>Just for you:</b> ${forYou.slice(0,4).join(" · ")}${forYou.length>4?` and ${forYou.length-4} more`:""}.`
+    : ` <br><b>Nothing booked just for you this week.</b> Worth adding one thing — a meal, a walk, a show. Capture it with <code>@life</code>.`;
+
   /* What got finished. state.json stamps an ISO time on every tick, so this
      is the one view that can answer "what did I actually do this week" —
      motivating, and the fastest way to notice an area has gone silent. */
@@ -87,7 +100,7 @@ try{
 
   $("statrow").innerHTML=[
     {n:decisions, label:decisions===1?"thing to decide":"things to decide", flag:decisions>0},
-    {n:slipped.length, label:"slipped", flag:false},
+    {n:slipped.length, label:"carried over", flag:false},
     {n:closed.length, label:"closed in the last 7 days", flag:false}
   ].map(s=>`<div class="stat${s.flag?" flag":""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("")
    + (capacity?`<div class="stat${aheadHrs>capacity?" slip":""}"><b>${fmtHours(aheadHrs)}</b><span>next 7 days, against ${fmtHours(capacity)} free</span></div>`:"");
@@ -138,8 +151,8 @@ try{
   const list=html=>`<div class="rvgroup">${html}</div>`;
 
   $("steps").innerHTML=[
-    step(1,"Slipped",
-      "Past its date and still open. Every one of these is a decision you already deferred once — make it now, and the front page stops carrying it.",
+    step(1,"Carried over",
+      "Past its date and still open. That happens to every list, and it isn't a verdict on the week — what helps is a decision rather than a guilty feeling: give it a day, park it, or let it go.",
       list(slipped.map(e=>rowOf(e,["today","week","someday","archive"],
         ` · was ${shortDate(e.date)}, ${relDay(e.date)}`)).join("")), slipped.length),
 
@@ -153,9 +166,9 @@ try{
       list(parked.map(e=>rowOf(e,["today","week","archive"])).join("")), parked.length),
 
     step(4,"The week ahead",
-      capacity
-        ? `Read-only. ${fmtHours(aheadHrs)} of work against ${fmtHours(capacity)} genuinely unclaimed — ${aheadHrs>capacity?"<b>that doesn't fit.</b> Something moves now or slips later.":"that fits."}`
-        : "Read-only — what's actually coming.",
+      (capacity
+        ? `Read-only. ${fmtHours(aheadHrs)} of work against ${fmtHours(capacity)} genuinely unclaimed — ${aheadHrs>capacity?"<b>that doesn't fit.</b> Better to move something now, on purpose, than have it carried over later.":"that fits."}`
+        : "Read-only — what's actually coming.")+forYouLine,
       list(soon.map(e=>`<div class="rvrow ${e.kind}" style="${styleOf(e.area)}">
           <span class="tickcell"></span>
           <span class="rvmain"><span class="ttl">${e.title}</span>${chips(e)}
