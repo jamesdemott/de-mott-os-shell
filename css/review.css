@@ -47,3 +47,8 @@
   .rvrow{grid-template-columns:19px minmax(0,1fr);gap:5px 14px}
   .decide{grid-column:2;justify-content:flex-start;margin-top:4px}
 }
+
+/* The paper loop: last week's printed edition comes back in here first. */
+.paperprompt{margin:12px 0 0;padding:8px 0;border-top:1px solid var(--rule);
+  font-family:var(--fd);font-style:italic;font-size:15px;color:var(--ink-2)}
+.paperprompt b{font-style:normal;font-weight:600;color:var(--ink)}

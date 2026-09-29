@@ -69,27 +69,72 @@
   .ed-ttl{grid-column:2}
 }
 
-/* Paper. Always the day edition — ink on a dark ground wastes a cartridge
-   and reads badly on a phone's PDF viewer in daylight. */
-@page{size:Letter;margin:.55in .6in}
+/* ---- the desk edition ----
+   Screen shows the reading page; paper shows only this. One Letter sheet,
+   landscape, always the day edition's ink on white. Built to be written on:
+   ruled lines fill whatever each day column leaves empty, deadlines get a
+   real box to tick with a pen, and nothing uses colour a mono printer would
+   turn to mud — the accent survives only as the deadline tick's weight. */
+.desk{display:none}
+@page{size:Letter landscape;margin:.38in .42in}
 @media print{
-  :root{--ground:#FFFFFF;--surface:#FFFFFF;--ink:#1A1713;--ink-2:#463F37;--muted:#6F665A;
-        --rule:#D8D0C0;--rule-2:#B8AD99;--accent:#B33A1C}
-  body{background:#fff;font-size:11pt}
-  .nav,.themebtn,#boot:empty{display:none!important}
-  .wrap{max-width:none;padding:0}
-  .ed-head{padding-top:0}
-  .ed-head h1{font-size:46pt;margin:12px 0 6px}
-  .ed-kicker a{border:none;color:inherit}
-  .ed-lead{margin:18px auto 4px}
-  .ed-lead h2{font-size:24pt}
-  .ed-stand{font-size:11.5pt}
-  .ed-week{margin-top:16px;column-gap:28px}
-  .ed-day{padding-bottom:10px}
-  .ed-dh b{font-size:13pt}
-  .ed-ttl{font-size:10.5pt}
-  .ed-row{padding:3px 0;grid-template-columns:38px 88px minmax(0,1fr)}
-  .ed-lower{margin-top:8px;padding-top:12px}
-  .ed-colophon{margin-top:18px}
-  .ed-colophon::after{display:none}
+  :root{--ground:#FFFFFF;--ink:#1A1713;--ink-2:#3E372F;--muted:#6F665A;
+        --rule:#CFC6B5;--rule-2:#A89D88;--accent:#B33A1C}
+  html,body{background:#fff}
+  body{font-size:9pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .themebtn,.nav,#boot,.wrap > *:not(.desk){display:none!important}
+  .wrap{max-width:none;padding:0;margin:0}
+  /* Pinned to the page box: anything left in flow above it (a hidden
+     header's margin, the wrap's padding) pushed the foot onto a second sheet.
+     margin:0 matters as much: base.css gives every section a top margin. */
+  body{margin:0}
+  .desk{display:flex;flex-direction:column;position:absolute;top:0;left:0;right:0;margin:0!important;
+    height:7.66in;color:var(--ink);font-family:var(--fb)}
+
+  .dk-head{display:flex;justify-content:space-between;align-items:flex-end;gap:18px;
+    border-bottom:2px solid var(--ink);padding-bottom:5px}
+  .dk-name{font-family:var(--fd);font-weight:600;font-size:22pt;letter-spacing:-.025em;line-height:1}
+  .dk-name span{display:block;font-family:var(--fd);font-style:italic;font-weight:400;font-size:9pt;
+    letter-spacing:0;color:var(--muted);margin-top:3px}
+  .dk-lead{text-align:right;max-width:60%}
+  .dk-lead b{display:block;font-family:var(--fd);font-weight:600;font-size:12.5pt;line-height:1.15}
+  .dk-lead span{font-size:8.5pt;color:var(--ink-2)}
+  .dk-one{display:flex;align-items:flex-end;gap:10px;padding:7px 0 5px;border-bottom:1px solid var(--rule-2)}
+  .dk-one b{font-family:var(--fd);font-weight:600;font-size:10.5pt;white-space:nowrap}
+  .dk-blank{flex:1;border-bottom:1px solid var(--ink-2);height:1px;margin-bottom:3px}
+
+  .dk-week{flex:1;display:grid;grid-template-columns:repeat(7,minmax(0,1fr));min-height:0;
+    border-bottom:1px solid var(--ink)}
+  .dk-day{display:flex;flex-direction:column;min-height:0;padding:5px 5px 0;
+    border-left:1px solid var(--rule)}
+  .dk-day:first-child{border-left:none;padding-left:0}
+  .dk-dh{border-bottom:1px solid var(--ink);padding-bottom:2px;margin-bottom:2px}
+  .dk-dh b{font-family:var(--fd);font-weight:600;font-size:11pt}
+  .dk-dh i{display:block;font-family:var(--fd);font-size:7.5pt;color:var(--muted);line-height:1.2}
+  .dk-scent{font-family:var(--fd);font-style:italic;font-size:7.5pt;color:var(--ink-2);padding:1px 0}
+  .dk-scent::before{content:"wear ";color:var(--muted)}
+  .dk-also{font-size:7pt;color:var(--muted);line-height:1.25;padding:1px 0 2px}
+  .dk-items{flex:none}
+  .dk-it{display:flex;gap:4px;align-items:flex-start;font-size:8pt;line-height:1.22;padding:2.5px 0;
+    border-bottom:1px solid var(--rule);break-inside:avoid}
+  .dk-it i{font-family:var(--fd);color:var(--muted)}
+  .dk-it em{font-style:normal;color:var(--muted);font-size:7.5pt}
+  .dk-it.due .dk-tt,.dk-it.admin .dk-tt{font-weight:600}
+  .dk-it.class .dk-tt,.dk-it.event .dk-tt{color:var(--ink-2)}
+  .dk-it.isdone .dk-tt{text-decoration:line-through;color:var(--muted)}
+  .dk-t{flex:none;width:26px;font-size:7pt;color:var(--muted);font-variant-numeric:tabular-nums;padding-top:.5px}
+  .dk-ck{flex:none;width:8px;height:8px;margin:1.5px 4px 0 1px;border:1.2px solid var(--ink)}
+  .dk-it.due .dk-ck{border-color:var(--accent);border-width:1.5px}
+  .dk-more,.dk-none{font-family:var(--fd);font-style:italic;font-size:7.5pt;color:var(--muted);padding:2px 0}
+  /* Writing lines: whatever height a column has left, ruled at 0.24in. */
+  .dk-lines{flex:1;min-height:.5in;
+    background-image:linear-gradient(to bottom,transparent calc(100% - .8px),var(--rule) calc(100% - .8px));
+    background-size:100% .24in;background-repeat:repeat-y}
+  .dk-lines.short{flex:none;height:.48in;min-height:0}
+
+  .dk-foot{display:grid;grid-template-columns:1fr 1fr 1.6fr;gap:14px;height:1.5in;padding-top:6px}
+  .dk-box{display:flex;flex-direction:column;min-height:0;overflow:hidden}
+  .dk-box h4{font-family:var(--fd);font-weight:600;font-size:9.5pt;margin:0 0 2px;
+    border-bottom:1px solid var(--ink);padding-bottom:2px}
+  .dk-colo{font-family:var(--fd);font-style:italic;font-size:6.5pt;color:var(--muted);text-align:right;padding-top:3px}
 }

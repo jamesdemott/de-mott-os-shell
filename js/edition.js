@@ -22,6 +22,7 @@ try{
   const state=await j("data/state.json").catch(()=>({done:{}}));
   const done=state.done||{};
   const week=await j("data/week.json").catch(()=>null);
+  const scentData=cfg.scent?await j(cfg.scent).catch(()=>null):null;
   const $=id=>document.getElementById(id);
 
   /* On a weekend it is next week's paper; midweek it is this week's. */
@@ -161,10 +162,64 @@ try{
   $("ed-colophon").textContent=`Printed ${new Date().toLocaleString([], {weekday:"long", hour:"numeric", minute:"2-digit"})} from De Mott OS · `
     +`${inWeek.length+meetings.length} items this week · hours are estimates where marked · private areas are never printed`;
 
+  /* ---------- the desk edition: what actually prints ----------
+     The screen page is for reading; this is for a desk, all week, with a pen.
+     Built on the week-on-one-page planner and Newport's time-block planner —
+     the paper formats that last because they are written on: one landscape
+     sheet, seven day columns each ending in ruled lines, a hand-tickable box
+     on every deadline, a blank for the week's one thing, and a "write it
+     down" box. The review asks what got written there (review.js), which is
+     the Bullet Journal migration that brings paper back into the system.
+     Each day also carries its forecast and a scent pick (js/scent.js). */
+  const termWeek=$("ed-no").textContent;
+  const deskRow=e=>{
+    const tick=e.kind==="due"||e.kind==="admin"||e.kind==="";
+    const lab=e.kind==="event"?e.label:e.label.replace(/^(\w+ \d+).*$/,"$1");
+    return `<div class="dk-it ${e.kind||"todo"}${e.done?" isdone":""}">`
+      +(tick&&e.kind!=="event"?`<span class="dk-ck"></span>`:`<span class="dk-t">${e.time?e.time.start:""}</span>`)
+      +`<span class="dk-tt">${tick&&e.kind!=="event"&&e.time?`<em>${e.time.start}</em> `:""}${clip(e.title,54)}<i> · ${lab}</i></span></div>`;
+  };
+  const paintDesk=wx=>{
+    const cols=days.map(ds=>{
+      const d=parseISO(ds), f=wx?.days?.find(x=>x.date===ds);
+      const items=rows.filter(e=>e.date===ds);
+      const wd=(d.getDay()+6)%7, hol=(week?.holidays||[]).includes(ds);
+      const sc=scentData&&typeof Scent!=="undefined"?Scent.pick(scentData,{items,
+        officeDay:!hol&&(week?.blocks||[]).some(b=>b.type==="novin"&&b.day===wd),
+        classDay:items.some(e=>e.kind==="class"),forecast:f||null}).day:null;
+      const cap=8, extra=items.length-cap;
+      return `<div class="dk-day">
+        <div class="dk-dh"><b>${DAYS[d.getDay()]} ${d.getDate()}</b>${f?`<i>${f.hi}° ${Weather.words(f.code).toLowerCase()}${f.rain>=30?`, ${f.rain}% rain`:""}</i>`:""}</div>
+        ${sc?`<div class="dk-scent">${sc.row.scent}</div>`:""}
+        ${calSplit.notes[ds]?`<div class="dk-also">${calSplit.notes[ds].join(" · ")}</div>`:""}
+        <div class="dk-items">${items.slice(0,cap).map(deskRow).join("")}${extra>0?`<div class="dk-more">+${extra} more</div>`:""}</div>
+        <div class="dk-lines"></div>
+      </div>`;}).join("");
+    const carried=slipped.slice(0,5).map(e=>`<div class="dk-it"><span class="dk-ck"></span><span class="dk-tt">${clip(e.title,48)}<i> · ${shortDate(e.date)}</i></span></div>`).join("")
+      +(slipped.length>5?`<div class="dk-more">+${slipped.length-5} more in the review</div>`:"");
+    $("ed-desk").innerHTML=`
+      <header class="dk-head">
+        <div class="dk-name">The Sunday Edition<span>Week of ${fmt(start)}${termWeek?" · "+termWeek:""}</span></div>
+        <div class="dk-lead"><b>${headline}</b>
+          <span>${dues.length} due · ${fmtHours(hrs)} of ${fmtHours(capacity)} free${rest?` · ${fmtHours(rest)} kept for you`:""}${slipped.length?` · ${slipped.length} carried over`:""}</span></div>
+      </header>
+      <div class="dk-one"><b>This week's one thing</b><span class="dk-blank"></span></div>
+      <div class="dk-week">${cols}</div>
+      <div class="dk-foot">
+        <div class="dk-box"><h4>Carried over</h4>${carried||`<div class="dk-none">Nothing carried over.</div>`}</div>
+        <div class="dk-box"><h4>For you this week</h4>${mine.length
+          ? mine.slice(0,4).map(e=>`<div class="dk-it"><span class="dk-t">${DAYS[parseISO(e.date).getDay()]}</span><span class="dk-tt">${clip(e.title,44)}</span></div>`).join("")
+          : `<div class="dk-none">Nothing booked yet — write one in.</div><div class="dk-lines short"></div>`}</div>
+        <div class="dk-box wide"><h4>Write it down</h4><div class="dk-none">Anything that comes up. Sunday's review asks what's here.</div><div class="dk-lines"></div></div>
+      </div>
+      <div class="dk-colo">Printed ${new Date().toLocaleString([], {weekday:"long", month:"short", day:"numeric", hour:"numeric", minute:"2-digit"})} · hours are estimates · private areas never print</div>`;
+  };
+  paintDesk(null);
+
   /* The forecast last, and never awaited past six seconds (Weather.get's own
      timeout): the paper prints with or without it. */
   const wx=cfg.ears?.weather&&typeof Weather!=="undefined"?await Weather.get(cfg.ears.weather):null;
-  if(wx) paintWeek(wx);
+  if(wx){ paintWeek(wx); paintDesk(wx); }
   document.body.dataset.ready="1";
 }catch(err){
   document.getElementById("boot").innerHTML=`<div class="empty">The edition didn't print: ${err.message}</div>`;

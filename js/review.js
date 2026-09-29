@@ -188,6 +188,17 @@ try{
         </div>`).join("")), closed.length)
   ].join("");
 
+  /* The paper loop. The Sunday Edition prints a "write it down" box and a
+     line per day; this is where those notes come back in, before anything
+     else gets decided (the Bullet Journal migration). Asked on the review's
+     own days — Saturday to Monday — and only as a line, never a step to pass. */
+  const dow=parseISO(TODAY).getDay();
+  if(dow===6||dow===0||dow===1){
+    const sub=document.getElementById("pagesub");
+    if(sub) sub.insertAdjacentHTML("afterend",
+      `<p class="paperprompt"><b>First:</b> anything written on last week's printed edition? Capture it before you start — then the sheet can go.</p>`);
+  }
+
   $("rebuild").textContent = decisions
     ? `${decisions} decision${decisions===1?"":"s"} waiting · read live at ${new Date().toLocaleTimeString()}`
     : `Nothing waiting on a decision — the list is current. Read live at ${new Date().toLocaleTimeString()}.`;
