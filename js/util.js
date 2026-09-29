@@ -289,6 +289,25 @@ const hoursOf   = e => e.hours != null ? e.hours : (HOUR_DEFAULTS[e.kind] ?? 1);
 const capacityOf = week => (week?.open || []).reduce((s, o) => s + (o.end - o.start), 0);
 const restOf     = week => Math.max(0, +(week?.restHours) || 0);
 const workable   = week => Math.max(0, capacityOf(week) - restOf(week));
+
+/* His Google calendars (data/calendar/events.json), split the way every
+   calendar app splits them: timed events are rows, all-day ones are a note
+   on the day. 44 of the first 96 events were all-day reminders — trash day,
+   pay day, street sweeping, weigh-ins — and as full rows they buried the
+   day view (2026-09-29). cfg.calendarHide drops titles containing any of its
+   strings (case-insensitive), for phone clutter like "Alarm notification".
+   Titles arrive HTML-escaped from the sync; they stay that way. */
+function calendarSplit(doc, cfg){
+  const hide = (cfg && cfg.calendarHide || []).map(h => String(h).toLowerCase());
+  const keep = c => !hide.some(h => String(c.title).toLowerCase().includes(h));
+  const items = (doc && doc.items || []).filter(keep);
+  const notes = {};
+  items.filter(c => !c.time).forEach(c => {
+    const list = (notes[c.date] = notes[c.date] || []);
+    if(!list.includes(c.title)) list.push(c.title);
+  });
+  return { timed: items.filter(c => c.time), notes };
+}
 const estimated = e => e.hours == null;
 const fmtHours  = h => (Math.round(h * 10) / 10) + "h";
 

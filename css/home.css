@@ -39,6 +39,11 @@ header.home .nameplate h1{margin:0}
 .ear .wx{font-size:15px;font-style:italic;font-weight:500}
 .ear i{display:block;font-family:var(--fd);font-size:12.5px;color:var(--ink-2);margin-top:2px}
 
+/* All-day calendar items: one small line on the day, never a row each. */
+.alsoday{font-size:12.5px;color:var(--muted);padding:6px 0 4px;line-height:1.45}
+.alsoday b{font-weight:600;color:var(--ink-2);margin-right:3px}
+.hitems .alsoday{padding:2px 0 6px}
+
 /* ---- wearing today ----
    The top box-out in the lead's side column, same rules as Course files: a
    serif name, an italic reason, sans apparatus. The scent's own "why" from

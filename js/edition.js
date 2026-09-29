@@ -45,7 +45,8 @@ try{
   const byId=Object.fromEntries(stored.map(e=>[e.id,e]));
 
   const cal=cfg.calendar?await j(cfg.calendar).catch(()=>null):null;
-  const meetings=(cal?.items||[]).filter(c=>c.date>=start&&c.date<=end).map(c=>({
+  const calSplit=calendarSplit(cal,cfg);
+  const meetings=calSplit.timed.filter(c=>c.date>=start&&c.date<=end).map(c=>({
     date:c.date, title:c.title, time:c.time||null, label:c.calendar, kind:"event",
     area:{accent:"--a-cal"}
   }));
@@ -136,6 +137,7 @@ try{
       const mine=rows.filter(e=>e.date===ds);
       return `<div class="ed-day${ds===TODAY?" today":""}">
         <div class="ed-dh"><b>${fmt(ds)}</b>${f?`<span class="ed-wx">${f.hi}° / ${f.lo}° · ${Weather.words(f.code)}${f.rain>=30?` · ${f.rain}% rain`:""}</span>`:""}</div>
+        ${calSplit.notes[ds]?`<div class="ed-also">${calSplit.notes[ds].join(" · ")}</div>`:""}
         ${mine.length?mine.map(row).join(""):`<div class="ed-none">Nothing booked.</div>`}
       </div>`;}).join("");
   };

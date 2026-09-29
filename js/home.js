@@ -87,7 +87,9 @@ try{
      arrive already expanded and already HTML-escaped (the sync does both). */
   const CAL={id:"calendar", name:"Calendar", accent:"--a-cal"};
   const calDoc=cfg.calendar?await j(cfg.calendar).catch(()=>null):null;
-  const calItems=(calDoc?.items||[]).map(c=>({
+  const calSplit=calendarSplit(calDoc,cfg), calNotes=calSplit.notes;
+  const alsoLine=ds=>calNotes[ds]?`<div class="alsoday"><b>Also:</b> ${calNotes[ds].join(" · ")}</div>`:"";
+  const calItems=calSplit.timed.map(c=>({
     id:null, date:c.date, title:c.title, kind:"event", note:"", weight:"",
     time:c.time||null, location:c.location||"", label:c.calendar,
     readonly:true, calendar:true, area:CAL, key:"cal:"+c.uid
@@ -278,7 +280,7 @@ try{
         <div class="dwords">${DAYS[now.getDay()]}, ${MONTHS[now.getMonth()]} ${now.getDate()}</div>
         <div class="count">${todays.length?todays.length+" item"+(todays.length>1?"s":""):"clear"}</div>
       </div>
-      <div class="rightnow" id="rightnow">${rightNow()}</div>`
+      <div class="rightnow" id="rightnow">${rightNow()}</div>${alsoLine(TODAY)}`
       + (todays.length
           ? `<div class="today-list">${todays.map(rowFor).join("")}</div>`
           : stopPress())
@@ -521,12 +523,14 @@ try{
   $("horizonhead").textContent="The next "+cfg.horizonDays+" days";
   const ahead=soon.filter(e=>e.date>TODAY), byDate={};
   ahead.forEach(e=>{(byDate[e.date]=byDate[e.date]||[]).push(e);});
+  // A day with only all-day notes still gets its line in the horizon.
+  Object.keys(calNotes).filter(ds=>ds>TODAY&&ds<=horizonEnd).forEach(ds=>{ byDate[ds]=byDate[ds]||[]; });
   const dates=Object.keys(byDate).sort();
   $("horizon").innerHTML = dates.length ? dates.map(ds=>{
     const n=daysUntil(ds);
     return `<div class="hday${n<=3?" soon":""}">
       <div class="hdate">${shortDate(ds)}<i>${relDay(ds)}</i></div>
-      <div class="hitems">${byDate[ds].map(e=>
+      <div class="hitems">${alsoLine(ds)}${byDate[ds].map(e=>
         `<div class="hitem ${e.kind}${e.done?" isdone":""}${e.board?" fromboard":""}" style="${styleOf(e.area)}" data-row="${e.id||""}">
            <span class="tickcell">${tickable(e)?tick(e):""}</span>
            <span class="tag">${e.label}</span>

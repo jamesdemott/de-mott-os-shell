@@ -46,6 +46,7 @@
 .ed-row.due .ed-t{color:var(--accent);font-weight:600}
 .ed-row.class .ed-ttl,.ed-row.event .ed-ttl{color:var(--ink-2)}
 .ed-row.isdone .ed-ttl{text-decoration:line-through;opacity:.5}
+.ed-also{font-size:12px;color:var(--muted);padding:3px 0 2px;font-style:italic;font-family:var(--fd)}
 .ed-none{font-family:var(--fd);font-style:italic;font-size:14px;color:var(--muted);padding:6px 0}
 
 .ed-lower{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:22px;
