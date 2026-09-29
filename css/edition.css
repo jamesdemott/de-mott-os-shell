@@ -76,14 +76,40 @@
    real box to tick with a pen, and nothing uses colour a mono printer would
    turn to mud — the accent survives only as the deadline tick's weight. */
 .desk{display:none}
+/* Two paper layouts while James compares them (2026-09-29): the desk sheet
+   (default, landscape) and the reading edition (the earlier portrait print
+   of this page). edition.js puts body.print-read on ?print=reading and swaps
+   the @page rule below for a portrait one — @page can't be scoped by class. */
 @page{size:Letter landscape;margin:.38in .42in}
 @media print{
   :root{--ground:#FFFFFF;--ink:#1A1713;--ink-2:#3E372F;--muted:#6F665A;
         --rule:#CFC6B5;--rule-2:#A89D88;--accent:#B33A1C}
   html,body{background:#fff}
-  body{font-size:9pt;-webkit-print-color-adjust:exact;print-color-adjust:exact}
-  .themebtn,.nav,#boot,.wrap > *:not(.desk){display:none!important}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .themebtn,.nav,#boot:empty{display:none!important}
   .wrap{max-width:none;padding:0;margin:0}
+
+  /* ---- reading edition (body.print-read): the earlier portrait print ---- */
+  body.print-read{font-size:11pt}
+  body.print-read .desk{display:none!important}
+  body.print-read .ed-head{padding-top:0}
+  body.print-read .ed-head h1{font-size:46pt;margin:12px 0 6px}
+  body.print-read .ed-kicker a{border:none;color:inherit}
+  body.print-read .ed-lead{margin:18px auto 4px}
+  body.print-read .ed-lead h2{font-size:24pt}
+  body.print-read .ed-stand{font-size:11.5pt}
+  body.print-read .ed-week{margin-top:16px;column-gap:28px}
+  body.print-read .ed-day{padding-bottom:10px}
+  body.print-read .ed-dh b{font-size:13pt}
+  body.print-read .ed-ttl{font-size:10.5pt}
+  body.print-read .ed-row{padding:3px 0;grid-template-columns:38px 88px minmax(0,1fr)}
+  body.print-read .ed-lower{margin-top:8px;padding-top:12px}
+  body.print-read .ed-colophon{margin-top:18px}
+  body.print-read .ed-colophon::after{display:none}
+
+  /* ---- desk edition (the default) ---- */
+  body:not(.print-read){font-size:9pt}
+  body:not(.print-read) .wrap > *:not(.desk){display:none!important}
   /* Pinned to the page box: anything left in flow above it (a hidden
      header's margin, the wrap's padding) pushed the foot onto a second sheet.
      margin:0 matters as much: base.css gives every section a top margin. */

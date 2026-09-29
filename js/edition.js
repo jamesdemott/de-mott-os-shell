@@ -15,6 +15,15 @@
    page designed to leave it. Areas with "home": false stay off too, for the
    same reason they are off the front page. */
 
+/* ?print=reading prints the earlier portrait layout instead of the desk
+   sheet. Set before anything renders so the swapped @page is in place. */
+if(new URLSearchParams(location.search).get("print")==="reading"){
+  document.body.classList.add("print-read");
+  const pg=document.createElement("style");
+  pg.textContent="@page{size:Letter portrait;margin:.55in .6in}";
+  document.head.appendChild(pg);
+}
+
 (async function(){
 try{
   const cfg=await j("data/areas.json");
