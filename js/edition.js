@@ -49,6 +49,7 @@ try{
       id:e.id, date:e.date||null, title:e.title, kind:e.kind||"", note:e.note||"",
       time:e.time||null, repeat:e.repeat||null, status:e.status||"",
       hours:e.hours!=null?e.hours:null, weightNum:e.weightNum||0, weight:e.weight||"",
+      course:e.course||null,
       label:e.label||(labels&&e.course&&labels[e.course]?labels[e.course].code:a.name), area:a
     }));
   }))).flat();
@@ -110,11 +111,11 @@ try{
 
   $("ed-figures").innerHTML=[
     {n:dues.length,label:"due"},
-    {n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over||tight},
+    {n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over||tight,cls:"hrs"},
     {n:slipped.length,label:"carried over",warn:slipped.length>0},
     {n:closed.length,label:"closed last week"},
     {n:someday,label:"on someday"}
-  ].map(s=>`<div class="stat${s.warn?" slip":""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("");
+  ].map(s=>`<div class="stat${s.warn?" slip":""}${s.cls?" "+s.cls:""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("");
 
   /* ---------- for you this week ----------
      Behavioral activation — the best-evidenced piece of CBT for low mood —
@@ -135,8 +136,13 @@ try{
   $("ed-foryou").classList.toggle("none",!mine.length);
 
   /* ---------- the week, day by day ---------- */
-  const row=e=>`<div class="ed-row ${e.kind}${e.done?" isdone":""}" style="--area:var(${e.area.accent})">
-      <span class="ed-t">${e.time?e.time.start:e.kind==="due"?"due":""}</span>
+  /* A turn-in: a course deliverable that is actually due — something has to
+     be submitted. It gets a highlighter band on screen and on both papers
+     (asked 2026-09-29). Admin deadlines (a return, a form) stay bold but
+     unbanded, so the band only ever means "hand something in". */
+  const turnIn=e=>e.kind==="due"&&!!e.course;
+  const row=e=>`<div class="ed-row ${e.kind}${turnIn(e)?" turnin":""}${e.done?" isdone":""}" style="--area:var(${e.area.accent})">
+      <span class="ed-t">${turnIn(e)?"turn in":e.time?e.time.start:e.kind==="due"?"due":""}</span>
       <span class="ed-tag">${e.label}</span>
       <span class="ed-ttl">${e.title}${e.weight&&e.kind==="due"?` <em>${e.weight}</em>`:""}</span>
     </div>`;
@@ -184,7 +190,7 @@ try{
   const deskRow=e=>{
     const tick=e.kind==="due"||e.kind==="admin"||e.kind==="";
     const lab=e.kind==="event"?e.label:e.label.replace(/^(\w+ \d+).*$/,"$1");
-    return `<div class="dk-it ${e.kind||"todo"}${e.done?" isdone":""}">`
+    return `<div class="dk-it ${e.kind||"todo"}${turnIn(e)?" turnin":""}${e.done?" isdone":""}">`
       +(tick&&e.kind!=="event"?`<span class="dk-ck"></span>`:`<span class="dk-t">${e.time?e.time.start:""}</span>`)
       +`<span class="dk-tt">${tick&&e.kind!=="event"&&e.time?`<em>${e.time.start}</em> `:""}${clip(e.title,54)}<i> · ${lab}</i></span></div>`;
   };
