@@ -80,6 +80,19 @@ try{
      something is the opposite of scheduling it. They stay reachable on their
      area's list page and in the weekly review, which is where they get
      resurfaced on purpose rather than nagging from here. */
+  /* His Google calendars, pulled down by sync_calendar.py. Not an area: no
+     tab, no card, nothing to tick — a meeting is a fact about the day, not a
+     piece of work — so they join the day view, the horizon and Colliding
+     read-only, and stay out of the load chart, Slipped and the review. Rows
+     arrive already expanded and already HTML-escaped (the sync does both). */
+  const CAL={id:"calendar", name:"Calendar", accent:"--a-cal"};
+  const calDoc=cfg.calendar?await j(cfg.calendar).catch(()=>null):null;
+  const calItems=(calDoc?.items||[]).map(c=>({
+    id:null, date:c.date, title:c.title, kind:"event", note:"", weight:"",
+    time:c.time||null, location:c.location||"", label:c.calendar,
+    readonly:true, calendar:true, area:CAL, key:"cal:"+c.uid
+  }));
+
   const stored=feeds.filter(f=>onHome(f.area)).flatMap(f=>f.items);
   const parked=stored.filter(e=>e.status==="someday").length;
 
@@ -91,7 +104,7 @@ try{
   const chartEnd=addDays(monday,WEEKS*7-1);
   const every=expand(stored.filter(isActive), TODAY, chartEnd);
   every.forEach(e=>{ e.done=!!done[e.key]; });
-  const all=every.filter(e=>e.date).sort((x,y)=>
+  const all=every.concat(calItems).filter(e=>e.date).sort((x,y)=>
     x.date<y.date?-1:x.date>y.date?1:(x.time?.start||"").localeCompare(y.time?.start||""));
   const loose=every.filter(e=>!e.date);        // captured with no date yet
 
@@ -129,17 +142,26 @@ try{
 
   /* ---------- the ears ----------
      A paper's nameplate is flanked by two small boxes — the weather, the
-     price. Here: which issue of the term this is, and how far off the next
-     big deadline sits. "Big" is a grade weight of at least ears.bigWeight, so
+     price. Here: the weather, and how far off the next big deadline sits.
+     The issue number lives in the dateline, where a paper prints Vol. / No. "Big" is a grade weight of at least ears.bigWeight, so
      the countdown is the thing worth dreading, not the next reading response.
      Either ear simply stays hidden when it has nothing true to say. */
   if(cfg.ears){
     const ears=cfg.ears;
     const meta=ears.term?await j(ears.term).catch(()=>null):null;
     if(meta?.termStart && TODAY>=meta.termStart && (!meta.termEnd || TODAY<=meta.termEnd)){
-      $("earL").innerHTML=`<b>No. ${daysBetween(meta.termStart,TODAY)+1}</b><i>of ${ears.termName||"the term"}</i>`;
-      $("earL").hidden=false;
+      $("eyebrow").textContent+=` · No. ${daysBetween(meta.termStart,TODAY)+1}`;
+      $("eyebrow").title=`Issue ${daysBetween(meta.termStart,TODAY)+1} of ${ears.termName||"the term"}`;
     }
+    /* Not awaited: the page must not wait on someone else's server. The ear
+       fills in when the answer lands, or never, and either is fine. */
+    if(ears.weather && typeof Weather!=="undefined") Weather.get(ears.weather).then(w=>{
+      const d=w?.days?.[0]; if(!w?.now || !d) return;
+      $("earL").innerHTML=`<b>${w.now.temp}° <span class="wx">${Weather.words(w.now.code)}</span></b>`
+        + `<i>${ears.weather.place} · high ${d.hi}°${d.rain>=20?` · ${d.rain}% rain`:""}</i>`;
+      $("earL").title=`Today ${d.lo}–${d.hi}°F, ${d.rain}% chance of rain · Open-Meteo`;
+      $("earL").hidden=false;
+    });
     const big=all.find(e=>e.date>=TODAY && e.kind==="due" && !e.done && (e.weightNum||0)>=(ears.bigWeight||20));
     if(big){
       const n=daysUntil(big.date);
@@ -273,6 +295,13 @@ try{
     const wDays=st.whatsappDigested?daysBetween(st.whatsappDigested.slice(0,10),TODAY):null;
     if(st.whatsappDigested!==undefined)
       parts.push({t:`WhatsApp read ${ago(st.whatsappDigested)||"never"}`, warn:wDays===null||wDays>2});
+    // His Google calendars. Only once a link exists — a warning about a sync
+    // he never set up is nagging, not news. Stale after a day: a meeting that
+    // moved this morning is exactly what this line is for.
+    if(st.calendarLinked){
+      const gDays=st.calendarSynced?daysBetween(st.calendarSynced.slice(0,10),TODAY):null;
+      parts.push({t:`calendar read ${ago(st.calendarSynced)||"never"}`, warn:gDays===null||gDays>1});
+    }
     if(st.phoneWaiting) parts.push({t:`${st.phoneWaiting} phone note${st.phoneWaiting===1?"":"s"} waiting`, warn:true});
     // The phone's outbox. A queue that quietly stopped draining looks exactly
     // like a phone that never captured anything, so the age goes on the line.
@@ -417,7 +446,7 @@ try{
      that range a bar is effectively binary. Discrete cells you can count carry
      the actual number, and still scale if a week ever gets busy. */
   const order=cfg.areas.map(a=>a.id);
-  const work=all.filter(e=>e.kind!=="class");
+  const work=all.filter(e=>e.kind!=="class" && !e.calendar);
   const cols=[];
   for(let i=0;i<WEEKS;i++){
     const from=addDays(monday,i*7), to=addDays(monday,i*7+6);

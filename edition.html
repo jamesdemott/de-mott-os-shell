@@ -1,0 +1,51 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>The Sunday Edition · De Mott OS</title>
+<link rel="icon" href="favicon.svg">
+<link rel="manifest" href="manifest.json">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="theme-color" content="#F7F3EB" media="(prefers-color-scheme:light)">
+<meta name="theme-color" content="#15130F" media="(prefers-color-scheme:dark)">
+<link rel="stylesheet" href="css/fonts.css">
+<link rel="stylesheet" href="css/base.css">
+<link rel="stylesheet" href="css/edition.css">
+</head>
+<body>
+<button class="themebtn" id="themebtn" type="button">theme</button>
+<div class="wrap edition">
+  <header class="ed-head">
+    <div class="ed-dateline"><span class="eyebrow" id="ed-date"></span><span class="ed-no" id="ed-no"></span></div>
+    <h1>The Sunday Edition</h1>
+    <div class="ed-kicker">The week ahead · <a href="review.html">inside: the review, where it gets decided</a></div>
+  </header>
+  <nav class="nav" id="nav"></nav>
+  <div id="boot"></div>
+
+  <section class="ed-lead">
+    <h2 id="ed-headline"></h2>
+    <p class="ed-stand" id="ed-stand"></p>
+    <div class="statrow" id="ed-figures"></div>
+  </section>
+
+  <section class="ed-week" id="ed-week"></section>
+
+  <div class="ed-lower">
+    <section id="ed-slipped" hidden><h3 class="ed-sec">Still open from before</h3><div id="ed-slipped-list"></div></section>
+    <section id="ed-closed"><h3 class="ed-sec">The record: last week</h3><div id="ed-closed-list"></div></section>
+  </div>
+
+  <footer class="ed-colophon" id="ed-colophon"></footer>
+</div>
+<script src="js/util.js"></script>
+<script src="js/outbox.js"></script>
+<script src="js/theme.js"></script>
+<script src="js/nav.js"></script>
+<script src="js/weather.js"></script>
+<script src="js/edition.js"></script>
+</body>
+</html>

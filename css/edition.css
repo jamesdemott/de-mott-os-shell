@@ -1,0 +1,87 @@
+/* The Sunday Edition — the week ahead as one page. Screen and print.
+   The same broadsheet rules as everywhere else (paper, rules, serif heads),
+   centred like a nameplate because this page is a front, not a tool. On
+   paper it drops the section bar and the theme button and fits one Letter
+   sheet: that is the version print_edition.sh delivers. */
+.ed-head{text-align:center;padding:34px 0 0}
+.ed-dateline{display:flex;justify-content:space-between;align-items:baseline;gap:12px;
+  padding-bottom:10px;border-bottom:1px solid var(--rule)}
+.ed-no{font-family:var(--fd);font-style:italic;font-size:13.5px;color:var(--muted)}
+.ed-head h1{font-size:clamp(40px,8vw,76px);font-weight:600;letter-spacing:-.035em;line-height:1;
+  margin:22px 0 10px}
+.ed-kicker{font-family:var(--fd);font-style:italic;color:var(--ink-2);padding-bottom:14px;
+  border-bottom:2px solid var(--ink)}
+.ed-kicker a{color:var(--accent);text-decoration:none;border-bottom:1px solid currentColor}
+.ed-head + .nav{margin-top:0}
+
+.ed-lead{text-align:center;margin:34px auto 10px;max-width:760px}
+.ed-lead h2{font-size:clamp(28px,4.6vw,44px);letter-spacing:-.025em;line-height:1.08}
+.ed-stand{font-family:var(--fd);font-style:italic;font-size:17px;color:var(--ink-2);
+  margin:12px auto 0;max-width:62ch}
+.ed-lead .statrow{justify-content:center}
+
+/* The week: two columns of days, read down then across, like a listings page. */
+.ed-week{columns:2;column-gap:40px;column-rule:1px solid var(--rule);margin-top:34px}
+.ed-day{break-inside:avoid;padding:0 0 18px}
+.ed-dh{display:flex;justify-content:space-between;align-items:baseline;gap:10px;
+  border-bottom:1px solid var(--ink);padding-bottom:4px;margin-bottom:4px}
+.ed-dh b{font-family:var(--fd);font-weight:600;font-size:19px}
+.ed-day.today .ed-dh b{color:var(--accent)}
+.ed-wx{font-family:var(--fd);font-style:italic;font-size:13px;color:var(--muted);white-space:nowrap}
+.ed-row{display:grid;grid-template-columns:44px 104px minmax(0,1fr);gap:0 12px;
+  padding:5px 0;border-bottom:1px solid var(--rule);align-items:baseline}
+.ed-t{font-size:12px;color:var(--muted);font-variant-numeric:tabular-nums}
+.ed-tag{font-family:var(--fd);font-style:italic;font-size:12.5px;color:var(--area,var(--muted));
+  text-align:right;line-height:1.3}
+.ed-ttl{font-family:var(--fd);font-size:15px;line-height:1.35}
+.ed-ttl em{font-family:var(--fb);font-style:normal;font-size:11.5px;color:var(--muted)}
+.ed-row.due .ed-ttl,.ed-row.admin .ed-ttl{font-weight:600}
+.ed-row.due .ed-t{color:var(--accent);font-weight:600}
+.ed-row.class .ed-ttl,.ed-row.event .ed-ttl{color:var(--ink-2)}
+.ed-row.isdone .ed-ttl{text-decoration:line-through;opacity:.5}
+.ed-none{font-family:var(--fd);font-style:italic;font-size:14px;color:var(--muted);padding:6px 0}
+
+.ed-lower{display:grid;grid-template-columns:1fr 1fr;gap:40px;margin-top:22px;
+  padding-top:18px;border-top:2px solid var(--ink)}
+/* With nothing slipped, the record takes the whole width. [hidden] still
+   counts as a child, so :only-child can't be used for this. */
+.ed-lower > section[hidden] + section{grid-column:1 / -1}
+.ed-lower > section[hidden] + section #ed-closed-list{columns:2;column-gap:40px}
+.ed-lower .ed-row{break-inside:avoid}
+.ed-sec{font-size:20px;margin-bottom:8px;padding-bottom:6px;border-bottom:1px solid var(--ink)}
+.ed-colophon{margin-top:40px;padding-top:12px;border-top:1px solid var(--rule-2);text-align:center;
+  font-family:var(--fd);font-style:italic;font-size:13px;color:var(--muted)}
+.ed-colophon::after{content:"❧";display:block;margin-top:18px;font-size:24px;color:var(--rule-2)}
+
+@media screen and (max-width:760px){
+  .ed-week{columns:1}
+  .ed-lower{grid-template-columns:1fr;gap:26px}
+  .ed-row{grid-template-columns:40px minmax(0,1fr)}
+  .ed-tag{grid-column:2;text-align:left}
+  .ed-ttl{grid-column:2}
+}
+
+/* Paper. Always the day edition — ink on a dark ground wastes a cartridge
+   and reads badly on a phone's PDF viewer in daylight. */
+@page{size:Letter;margin:.55in .6in}
+@media print{
+  :root{--ground:#FFFFFF;--surface:#FFFFFF;--ink:#1A1713;--ink-2:#463F37;--muted:#6F665A;
+        --rule:#D8D0C0;--rule-2:#B8AD99;--accent:#B33A1C}
+  body{background:#fff;font-size:11pt}
+  .nav,.themebtn,#boot:empty{display:none!important}
+  .wrap{max-width:none;padding:0}
+  .ed-head{padding-top:0}
+  .ed-head h1{font-size:46pt;margin:12px 0 6px}
+  .ed-kicker a{border:none;color:inherit}
+  .ed-lead{margin:18px auto 4px}
+  .ed-lead h2{font-size:24pt}
+  .ed-stand{font-size:11.5pt}
+  .ed-week{margin-top:16px;column-gap:28px}
+  .ed-day{padding-bottom:10px}
+  .ed-dh b{font-size:13pt}
+  .ed-ttl{font-size:10.5pt}
+  .ed-row{padding:3px 0;grid-template-columns:38px 88px minmax(0,1fr)}
+  .ed-lower{margin-top:8px;padding-top:12px}
+  .ed-colophon{margin-top:18px}
+  .ed-colophon::after{display:none}
+}

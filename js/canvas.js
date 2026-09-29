@@ -75,6 +75,22 @@
         + (filed ? `${filed} new file${filed===1?"":"s"} filed` : "nothing new"))
       + (checked ? ` · checked ${hoursSince(checked) < 1 ? "just now" : relDay(checked.slice(0,10))}` : "");
 
+    /* The browser-only courses (MBA 282) never pull themselves, and should
+       not: that path drives a live bCourses session, so it runs only when
+       asked, never on a timer (James, 2026-09-29). What stops it quietly going
+       stale is this line — once a course has gone a week unchecked, the panel
+       says so in the accent. The record is the report's `checked` list, which
+       a pull posts even when it finds nothing. */
+    const lastBrowsed = cid => ((pull && pull.pulls) || [])
+      .find(r => (r.checked || []).includes(cid) || (r.filed || []).some(f => f.course === cid));
+    const overdue = browserCourses.map(cid => {
+      const r = lastBrowsed(cid);
+      const days = r ? daysBetween(r.pulledAt.slice(0,10), TODAY) : null;
+      return days === null || days >= 7 ? `${name(cid)} ${days === null ? "hasn't been pulled yet" : `last pulled ${days}d ago`}` : "";
+    }).filter(Boolean);
+    const nudge = overdue.length
+      ? `<div class="cvnudge">${overdue.join(" · ")} — say “pull canvas” to Claude.</div>` : "";
+
     panel.innerHTML = `
       <div class="cvtop">
         <div>
@@ -85,6 +101,7 @@
         ${blocked ? "" : `<button type="button" id="cvbtn" ${offline?"disabled":""}>Pull Canvas</button>`}
       </div>
       <div class="cvcourses">${counts}</div>
+      ${nudge}
       ${status || offline || scanError ? `<div class="cvnote" id="cvnote">${status || (offline
         ? `The server isn't answering — open this through <code>./serve.sh</code> or the dock icon.`
         : blocked

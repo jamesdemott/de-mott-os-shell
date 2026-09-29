@@ -14,16 +14,18 @@
  * shell's own bytes, so a deploy that changes nothing evicts nothing, and a
  * deploy that changes anything evicts everything.
  */
-const VERSION = "d2ff9f12c916";
+const VERSION = "bf9fdb729dba";
 const SHELL   = [
   "capture.html",
   "css/base.css",
+  "css/edition.css",
   "css/fonts.css",
   "css/home.css",
   "css/list.css",
   "css/review.css",
   "css/school.css",
   "done.html",
+  "edition.html",
   "favicon.svg",
   "fonts/fraunces-italic-400-700-latin-ext.woff2",
   "fonts/fraunces-italic-400-700-latin.woff2",
@@ -47,6 +49,7 @@ const SHELL   = [
   "js/capture.js",
   "js/capturepage.js",
   "js/done.js",
+  "js/edition.js",
   "js/home.js",
   "js/list.js",
   "js/nav.js",
@@ -60,6 +63,7 @@ const SHELL   = [
   "js/think.js",
   "js/todo.js",
   "js/util.js",
+  "js/weather.js",
   "js/whatsapp.js",
   "list.html",
   "manifest.json",
