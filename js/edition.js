@@ -36,7 +36,11 @@ try{
 
   /* On a weekend it is next week's paper; midweek it is this week's. */
   const dow=parseISO(TODAY).getDay();                  // 0 = Sunday
-  const start=dow===0?addDays(TODAY,1):dow===6?addDays(TODAY,2):addDays(TODAY,-(dow-1));
+  let start=dow===0?addDays(TODAY,1):dow===6?addDays(TODAY,2):addDays(TODAY,-(dow-1));
+  /* ?week=2026-10-05 previews any week (snapped back to its Monday) — for
+     looking at next week's paper early, and for testing the nameplate. */
+  const wq=new URLSearchParams(location.search).get("week");
+  if(wq&&/^\d{4}-\d{2}-\d{2}$/.test(wq)){ const wd=(parseISO(wq).getDay()+6)%7; start=addDays(wq,-wd); }
   const end=addDays(start,6);
   const fmt=ds=>{const d=parseISO(ds);return `${DAYS[d.getDay()]} ${d.getDate()} ${MONTHS[d.getMonth()]}`;};
 
@@ -54,6 +58,12 @@ try{
     }));
   }))).flat();
   const byId=Object.fromEntries(stored.map(e=>[e.id,e]));
+
+  /* A turn-in: a course deliverable that is actually due — something has to
+     be submitted. It gets a highlighter band on screen and on both papers
+     (asked 2026-09-29). Admin deadlines (a return, a form) stay bold but
+     unbanded, so the band only ever means "hand something in". */
+  const turnIn=e=>e.kind==="due"&&!!e.course;
 
   const cal=cfg.calendar?await j(cfg.calendar).catch(()=>null):null;
   const calSplit=calendarSplit(cal,cfg);
@@ -73,7 +83,8 @@ try{
   const dues=work.filter(e=>e.kind==="due");
   const hrs=work.reduce((s,e)=>s+hoursOf(e),0);
   const guessed=work.filter(estimated).length;
-  const capacity=capacityOf(week), rest=restOf(week), room=workable(week);
+  const showHrs=hoursOn(cfg);
+  const capacity=showHrs?capacityOf(week):0, rest=restOf(week), room=workable(week);
   const slipped=stored.filter(e=>e.date&&e.date<TODAY&&!done[e.id]&&!e.repeat&&!e.status
     &&(e.kind==="due"||e.kind==="admin"||e.kind===""));
   const someday=stored.filter(e=>e.status==="someday"&&!done[e.id]).length;
@@ -96,7 +107,25 @@ try{
     : !dues.length             ? "A quiet week."
     : `${dues.length} deadline${dues.length===1?"":"s"}, none of them heavy.`;
   $("ed-headline").textContent=headline;
-  document.title=`The Sunday Edition — ${headline}`;
+  /* ---------- the nameplate: which week this is ----------
+     "The Sunday Edition" said nothing about which week (James, 2026-09-29),
+     so the nameplate is the week itself: "Week 6", the week of term, with
+     its dates. When a heavy turn-in (weight >= ears.bigWeight) lands in it,
+     the week is named after that, the way you'd remember it anyway — "the
+     Offering Memorandum Review week". Facts only; a week without one just
+     carries its dates. Outside the term it is "Week of 21 Dec". */
+  const meta=cfg.ears?.term?await j(cfg.ears.term).catch(()=>null):null;
+  const inTerm=meta?.termStart&&start>=meta.termStart&&(!meta.termEnd||start<=meta.termEnd);
+  const termWeeks=inTerm&&meta.termEnd?Math.ceil((daysBetween(meta.termStart,meta.termEnd)+1)/7):null;
+  const weekNo=inTerm?Math.floor(daysBetween(meta.termStart,start)/7)+1:null;
+  const short=ds=>{const d=parseISO(ds);return `${d.getDate()} ${MONTHS[d.getMonth()].slice(0,3)}`;};
+  const edTitle=weekNo?`Week ${weekNo}`:`Week of ${short(start)}`;
+  const heavy=dues.filter(e=>turnIn(e)&&e.weightNum>=bigW).sort((a,b)=>b.weightNum-a.weightNum)[0];
+  const edTag=heavy?`the ${clip(heavy.title.replace(/\s+—.*$/,""),48)} week`:"";
+  const edDates=`${short(start)} – ${short(end)}${termWeeks?` · of ${termWeeks}`:""}`;
+  $("ed-title").textContent=edTitle;
+  $("ed-tag").textContent=edTag?edTag.charAt(0).toUpperCase()+edTag.slice(1):"The week ahead";
+  document.title=`${edTitle} — ${headline}`;
 
   const nMeet=meetings.filter(m=>m.time).length;
   const stand=[
@@ -111,11 +140,11 @@ try{
 
   $("ed-figures").innerHTML=[
     {n:dues.length,label:"due"},
-    {n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over||tight,cls:"hrs"},
+    showHrs?{n:fmtHours(hrs),label:`of ${fmtHours(capacity)} free`,warn:over||tight,cls:"hrs"}:null,
     {n:slipped.length,label:"carried over",warn:slipped.length>0},
     {n:closed.length,label:"closed last week"},
     {n:someday,label:"on someday"}
-  ].map(s=>`<div class="stat${s.warn?" slip":""}${s.cls?" "+s.cls:""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("");
+  ].filter(Boolean).map(s=>`<div class="stat${s.warn?" slip":""}${s.cls?" "+s.cls:""}"><b>${s.n}</b><span>${s.label}</span></div>`).join("");
 
   /* ---------- for you this week ----------
      Behavioral activation — the best-evidenced piece of CBT for low mood —
@@ -136,11 +165,6 @@ try{
   $("ed-foryou").classList.toggle("none",!mine.length);
 
   /* ---------- the week, day by day ---------- */
-  /* A turn-in: a course deliverable that is actually due — something has to
-     be submitted. It gets a highlighter band on screen and on both papers
-     (asked 2026-09-29). Admin deadlines (a return, a form) stay bold but
-     unbanded, so the band only ever means "hand something in". */
-  const turnIn=e=>e.kind==="due"&&!!e.course;
   const row=e=>`<div class="ed-row ${e.kind}${turnIn(e)?" turnin":""}${e.done?" isdone":""}" style="--area:var(${e.area.accent})">
       <span class="ed-t">${turnIn(e)?"turn in":e.time?e.time.start:e.kind==="due"?"due":""}</span>
       <span class="ed-tag">${e.label}</span>
@@ -170,10 +194,9 @@ try{
       +(closed.length>12?`<div class="ed-none">and ${closed.length-12} more.</div>`:"")
     : `<div class="ed-none">Nothing ticked off. A week can be like that; the record says so rather than hiding it.</div>`;
 
-  $("ed-date").textContent=`Week of ${fmt(start)} ${parseISO(start).getFullYear()}`;
-  const meta=cfg.ears?.term?await j(cfg.ears.term).catch(()=>null):null;
-  if(meta?.termStart&&start>=meta.termStart&&(!meta.termEnd||start<=meta.termEnd))
-    $("ed-no").textContent=`Week ${Math.floor(daysBetween(meta.termStart,start)/7)+1} of ${cfg.ears.termName||"the term"}`;
+  $("ed-date").textContent=`${short(start)} – ${short(end)} ${parseISO(start).getFullYear()}`;
+  // The right of the dateline names the term, since the nameplate is the week.
+  if(weekNo) $("ed-no").textContent=`${termWeeks?`${termWeeks - weekNo} week${termWeeks - weekNo===1?"":"s"} left in `:""}${cfg.ears.termName||"the term"}`;
   $("ed-colophon").textContent=`Printed ${new Date().toLocaleString([], {weekday:"long", hour:"numeric", minute:"2-digit"})} from De Mott OS · `
     +`${inWeek.length+meetings.length} items this week · hours are estimates where marked · private areas are never printed`;
 
@@ -186,7 +209,6 @@ try{
      down" box. The review asks what got written there (review.js), which is
      the Bullet Journal migration that brings paper back into the system.
      Each day also carries its forecast and a scent pick (js/scent.js). */
-  const termWeek=$("ed-no").textContent;
   const deskRow=e=>{
     const tick=e.kind==="due"||e.kind==="admin"||e.kind==="";
     const lab=e.kind==="event"?e.label:e.label.replace(/^(\w+ \d+).*$/,"$1");
@@ -214,9 +236,9 @@ try{
       +(slipped.length>5?`<div class="dk-more">+${slipped.length-5} more in the review</div>`:"");
     $("ed-desk").innerHTML=`
       <header class="dk-head">
-        <div class="dk-name">The Sunday Edition<span>Week of ${fmt(start)}${termWeek?" · "+termWeek:""}</span></div>
+        <div class="dk-name">${edTitle}<span>${edTag?edTag.charAt(0).toUpperCase()+edTag.slice(1)+" · ":""}${edDates}</span></div>
         <div class="dk-lead"><b>${headline}</b>
-          <span>${dues.length} due · ${fmtHours(hrs)} of ${fmtHours(capacity)} free${rest?` · ${fmtHours(rest)} kept for you`:""}${slipped.length?` · ${slipped.length} carried over`:""}</span></div>
+          <span>${dues.length} due${showHrs?` · ${fmtHours(hrs)} of ${fmtHours(capacity)} free${rest?` · ${fmtHours(rest)} kept for you`:""}`:""}${slipped.length?` · ${slipped.length} carried over`:""}</span></div>
       </header>
       <div class="dk-one"><b>This week's one thing</b><span class="dk-blank"></span></div>
       <div class="dk-week">${cols}</div>

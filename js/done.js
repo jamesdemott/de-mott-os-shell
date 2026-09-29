@@ -90,7 +90,7 @@ try{
     const items=weeks[w];
     return `<section class="step">
       <div class="shead"><h2>${weekName(w)} <span class="lcount">${items.length}</span></h2>
-        <p class="note">${shortDate(w)} – ${shortDate(addDays(w,6))} · about ${fmtHours(hoursIn(items))} of work, by the same estimates the front page counts capacity with.</p></div>
+        <p class="note">${shortDate(w)} – ${shortDate(addDays(w,6))} ${hoursOn(cfg)?` · about ${fmtHours(hoursIn(items))} of work, by the same estimates the front page counts capacity with`:""}.</p></div>
       <div class="rvgroup">${items.map(e=>row(e,`ticked ${shortDate(e.closedAt)}`)).join("")}</div>
     </section>`;}).join("")
     : `<div class="empty">Nothing ticked off yet. This page fills itself in as you use the rest.</div>`;

@@ -290,6 +290,15 @@ const capacityOf = week => (week?.open || []).reduce((s, o) => s + (o.end - o.st
 const restOf     = week => Math.max(0, +(week?.restHours) || 0);
 const workable   = week => Math.max(0, capacityOf(week) - restOf(week));
 
+/* The whole hours read can be switched off: `"hoursRead": false` in
+   data/areas.json (2026-09-29). James: readings are ad hoc — light one week,
+   brutal the next — and personal time isn't worked out yet, so every
+   estimated hours figure and every fits / doesn't-fit judgement was a precise
+   number that meant nothing. With it off, pages show counts of real things
+   only. Hours he typed himself (~2h) still show on their own rows: those are
+   his, not a guess. The machinery stays, so turning it back on is one word. */
+const hoursOn    = cfg => !(cfg && cfg.hoursRead === false);
+
 /* His Google calendars (data/calendar/events.json), split the way every
    calendar app splits them: timed events are rows, all-day ones are a note
    on the day. 44 of the first 96 events were all-day reminders — trash day,

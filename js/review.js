@@ -95,7 +95,8 @@ try{
 
   /* ---------- header ---------- */
   const decisions=slipped.length+sitting.length+parked.length;
-  const capacity=capacityOf(week), rest=restOf(week), room=workable(week);
+  const showHrs=hoursOn(cfg);
+  const capacity=showHrs?capacityOf(week):0, rest=restOf(week), room=workable(week);
   const aheadHrs=soon.filter(e=>!done[e.key]).reduce((s,e)=>s+hoursOf(e),0);
 
   $("statrow").innerHTML=[
@@ -176,7 +177,7 @@ try{
           <span class="tickcell"></span>
           <span class="rvmain"><span class="ttl">${e.title}</span>${chips(e)}
             <span class="nt"><em class="lareatag">${e.label}</em> · ${shortDate(e.date)}, ${relDay(e.date)}</span></span>
-          <span class="decide"><span class="age">${fmtHours(hoursOf(e))}${estimated(e)?" est.":""}</span></span>
+          <span class="decide"><span class="age">${showHrs?fmtHours(hoursOf(e))+(estimated(e)?" est.":""):""}</span></span>
         </div>`).join("")), soon.length),
 
     step(5,"Closed in the last 7 days",

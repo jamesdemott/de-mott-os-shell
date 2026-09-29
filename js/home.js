@@ -561,7 +561,8 @@ try{
      data/week.json, which is the only number here that can say "this doesn't
      fit" before the week arrives. Nothing off the shelf can compute it,
      because nothing else knows both the class schedule and the Novin hours. */
-  const capacity=capacityOf(week), rest=restOf(week), room=workable(week);
+  const showHrs=hoursOn(cfg);
+  const capacity=showHrs?capacityOf(week):0, rest=restOf(week), room=workable(week);
   cols.forEach(c=>{
     c.hrs=c.items.filter(e=>!e.done).reduce((s,e)=>s+hoursOf(e),0);
     c.guessed=c.items.filter(e=>!e.done&&estimated(e)).length;
@@ -575,7 +576,7 @@ try{
   $("loadstrip").innerHTML=cols.map((c,i)=>{
     const n=c.items.length;
     const cells=c.items.map(e=>
-      `<i style="background:var(${e.area.accent})${e.done?";opacity:.3":""}" title="${e.area.name} · ${e.title} · ${fmtHours(hoursOf(e))}${estimated(e)?" (estimated)":""}"></i>`).join("");
+      `<i style="background:var(${e.area.accent})${e.done?";opacity:.3":""}" title="${e.area.name} · ${e.title}${showHrs?` · ${fmtHours(hoursOf(e))}${estimated(e)?" (estimated)":""}`:""}"></i>`).join("");
     const fit=capacity>0?` — ${fmtHours(c.hrs)} of work against ${fmtHours(capacity)} unclaimed${rest?`, ${fmtHours(rest)} of it kept for you`:""}`:"";
     return `<div class="lbar${i===0?" now":""}${c.over?" over":""}" title="week of ${shortDate(c.from)} — ${n?n+(n===1?" item":" items"):"nothing due"}${fit}">
       <div class="cells">${cells}</div></div>`;
@@ -583,7 +584,7 @@ try{
   $("loadlabels").innerHTML=cols.map(c=>{
     const d=parseISO(c.from);
     return `<div>${MONTHS[d.getMonth()].slice(0,3)} ${d.getDate()}`
-      + (c.hrs?`<i class="lhrs${c.over?" over":""}">${fmtHours(c.hrs)}</i>`:`<i class="lhrs"></i>`)
+      + (c.hrs&&showHrs?`<i class="lhrs${c.over?" over":""}">${fmtHours(c.hrs)}</i>`:`<i class="lhrs"></i>`)
       + `</div>`;
   }).join("");
 
@@ -595,7 +596,7 @@ try{
         +(rest?` A week fits if it leaves <b>${fmtHours(rest)} for you</b>, wherever they fall.`:"")+`</span>`:"")
     + (tight.length?`<span class="over"><b>${rest?"No room left for you:":"Over capacity:"}</b> ${tight.join(", ")}.</span>`:"")
     + (quiet.length?`<span><b>Clear weeks:</b> ${quiet.join(", ")}.</span>`:"")
-    + (guessed?`<span>${guessed} item${guessed===1?" has":"s have"} an estimated duration — set a real one with <code>~2h</code> on capture, or in the row editor.</span>`:"")
+    + (guessed&&showHrs?`<span>${guessed} item${guessed===1?" has":"s have"} an estimated duration — set a real one with <code>~2h</code> on capture, or in the row editor.</span>`:"")
     + `<span>${cfg.areas.filter(a=>a.live&&onHome(a)).map(a=>`<em style="background:var(${a.accent})"></em>${a.name}`).join(" &nbsp; ")}</span>`;
 
   /* ---------- in flight: work that has a status but no date ----------

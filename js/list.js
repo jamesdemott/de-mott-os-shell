@@ -69,7 +69,7 @@ try{
     {n:open.length-live.length, label:"someday"},
     {n:closed.length, label:"done"}
   ].map(s=>`<div class="stat"><b>${s.n}</b><span>${s.label}</span></div>`).join("")
-   + (hrs?`<div class="stat"><b>${fmtHours(hrs)}</b><span>of work, estimated</span></div>`:"")
+   + (hrs&&hoursOn(cfg)?`<div class="stat"><b>${fmtHours(hrs)}</b><span>of work, estimated</span></div>`:"")
    + (open.filter(e=>bucketOf(e)==="overdue").length
       ? `<div class="stat slip"><b>${open.filter(e=>bucketOf(e)==="overdue").length}</b><span>overdue</span></div>` : "");
 
